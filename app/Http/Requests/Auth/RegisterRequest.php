@@ -2,6 +2,10 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Enums\AbuseEventType;
+use App\Enums\AbuseSeverity;
+use App\Enums\AbuseStatus;
+use App\Services\Abuse\AbuseLoggerService;
 use App\Services\User\UsernameService;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
@@ -41,6 +45,17 @@ class RegisterRequest extends FormRequest
     {
         return [
             function (Validator $validator): void {
+                if ($this->filled('website')) {
+                    app(AbuseLoggerService::class)->log(
+                        AbuseEventType::RegistrationAttempt,
+                        AbuseSeverity::High,
+                        AbuseStatus::Blocked,
+                        'Registration honeypot triggered.',
+                        request: $this,
+                        riskScore: 80,
+                    );
+                }
+
                 $startedAt = (int) $this->input('form_started_at');
                 $minimumSeconds = (int) config('auth_access.registration.minimum_submit_seconds', 2);
 

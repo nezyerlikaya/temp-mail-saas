@@ -2,7 +2,11 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Enums\AbuseEventType;
+use App\Enums\AbuseSeverity;
+use App\Enums\AbuseStatus;
 use App\Enums\UserStatus;
+use App\Services\Abuse\AbuseLoggerService;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -36,6 +40,13 @@ class LoginRequest extends FormRequest
             'status' => UserStatus::Active->value,
         ], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey(), (int) config('auth_access.login.decay_seconds', 60));
+            app(AbuseLoggerService::class)->log(
+                AbuseEventType::LoginAttempt,
+                AbuseSeverity::Low,
+                AbuseStatus::Observed,
+                'Failed login attempt.',
+                request: $this,
+            );
 
             throw ValidationException::withMessages([
                 'email' => __('The provided credentials are incorrect.'),
@@ -54,6 +65,14 @@ class LoginRequest extends FormRequest
         }
 
         event(new Lockout($this));
+        app(AbuseLoggerService::class)->log(
+            AbuseEventType::LoginAttempt,
+            AbuseSeverity::Medium,
+            AbuseStatus::Throttled,
+            'Login cooldown applied.',
+            request: $this,
+            riskScore: 40,
+        );
 
         throw ValidationException::withMessages([
             'email' => __('Too many login attempts. Please try again later.'),
@@ -62,6 +81,10 @@ class LoginRequest extends FormRequest
 
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')->toString()).'|'.$this->ip());
+        return hash_hmac(
+            'sha256',
+            Str::transliterate(Str::lower($this->string('email')->toString()).'|'.$this->ip()),
+            (string) config('abuse.hash_salt', config('app.key', 'local-abuse-salt')),
+        );
     }
 }

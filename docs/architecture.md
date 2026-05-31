@@ -600,6 +600,66 @@ Shared-hosting deployments can invoke Laravel's scheduler from a standard cron e
 
 The cleanup service leaves attachment file deletion, object-storage lifecycle rules, mailbox history cleanup, admin cleanup dashboards, and billing-tier controls for later steps. The aggregate audit model and service boundaries are ready for those features without exposing private mail data.
 
+## STEP14 Abuse Detection And Rate Limit System
+
+STEP14 adds a privacy-first abuse detection and rate-limit foundation without introducing an admin dashboard, moderation UI, external CAPTCHA provider, IP ban management, WAF integration, billing-tier controls, or raw device fingerprinting.
+
+The foundation protects public inbox generation, mailbox rotation, inbox polling, message detail reads, login attempts, and registration attempts. It uses Laravel's cache-compatible rate limiter, so shared-hosting deployments do not require Redis.
+
+## Multi-Signal Abuse Strategy
+
+`App\Services\Abuse\AbuseSignalService` derives safe request signals from the IP address, session identifier, optional authenticated user ID, user agent, route name, endpoint, and HTTP method. Raw IP addresses, raw session identifiers, and raw user-agent values are never returned or persisted.
+
+The limiter uses a hashed IP signal as its stable base, adds an authenticated user signal when available, and falls back to the hashed session signal when an IP signal is unavailable. This keeps limiter keys privacy-safe while avoiding easy bypass through session rotation.
+
+## Privacy-First Hashing And Logging
+
+Signal hashing uses HMAC SHA-256 with the configured abuse salt. `App\Services\Abuse\AbuseLoggerService` stores aggregate and operational metadata only. It removes sensitive metadata keys such as payloads, bodies, headers, credentials, email values, raw IP values, session values, and user-agent values before writing.
+
+`abuse_events` stores UUID, event type, severity, status, hashed signals, optional user references, safe route metadata, risk score, safe reason, sanitized metadata, and timestamps. It never stores raw request payloads, email content, mailbox content, credentials, raw network identifiers, or raw browser identifiers.
+
+Logging silently fails when the database is unavailable during installer or recovery scenarios. Abuse logging must not block installation recovery or public-safe error handling.
+
+## Rate Limit Profiles
+
+`App\Services\Abuse\RateLimitProfileService` centralizes conservative per-minute profiles and cooldown placeholders for:
+
+- Mailbox generation
+- Mailbox rotation
+- Inbox polling
+- Message detail reads
+- Login attempts
+- Registration attempts
+
+Profiles live in `config/abuse.php` and are ready for future account-tier extension without embedding policy in routes or controllers.
+
+## Progressive Decisions
+
+`App\Services\Abuse\AbuseDecisionService` returns a structured decision with:
+
+- `allowed`
+- `status`
+- `risk_score`
+- `cooldown_seconds`
+- `requires_captcha`
+- `reason`
+
+The initial risk score is intentionally simple and cache-independent. It supports observed, throttled, blocked, and escalated outcomes. Progressive cooldowns can increase with risk score. CAPTCHA escalation is configuration-ready only; STEP14 does not call an external CAPTCHA or Turnstile provider.
+
+## Public Inbox Protection
+
+STEP12 public inbox endpoints now use separate hashed-signal limiter profiles. JSON throttles return a generic `429` message without exposing limiter keys, risk details, hashes, or internal policy values. Throttle events are recorded as privacy-safe abuse events when logging is available.
+
+The Alpine inbox UI already handles failed refresh requests gracefully, so polling cooldowns remain compatible with the existing public inbox experience.
+
+## Authentication Observation
+
+Failed login attempts create a low-severity observed event. Login cooldowns create a throttled event. Registration honeypot triggers create a blocked event. These observations preserve existing enumeration-safe auth messages and never store submitted credentials, email addresses, or honeypot values.
+
+## Future Compatibility
+
+STEP14 deliberately has no abuse admin UI. The event schema, safe logger, profiles, and decision service provide a stable foundation for future moderation dashboards, CAPTCHA integration, trusted proxy configuration, account-tier policy, and operational review without changing public endpoint contracts.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:

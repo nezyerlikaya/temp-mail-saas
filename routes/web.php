@@ -34,13 +34,13 @@ Route::get('/status', fn (HealthCheckService $health) => view('pages.status', [
 
 Route::get('/inbox', [PublicInboxController::class, 'index'])->name('inbox.index');
 Route::post('/inbox/generate', [PublicInboxController::class, 'generate'])
-    ->middleware('throttle:inbox-mailbox-actions')
+    ->middleware('throttle:inbox-mailbox-generation')
     ->name('inbox.generate');
 Route::post('/inbox/rotate', [PublicInboxController::class, 'rotate'])
-    ->middleware('throttle:inbox-mailbox-actions')
+    ->middleware('throttle:inbox-mailbox-rotation')
     ->name('inbox.rotate');
 Route::post('/inbox/forget', [PublicInboxController::class, 'forget'])
-    ->middleware('throttle:inbox-mailbox-actions')
+    ->middleware('throttle:inbox-mailbox-rotation')
     ->name('inbox.forget');
 Route::get('/inbox/messages', [PublicInboxController::class, 'messages'])
     ->middleware('throttle:inbox-message-polling')
