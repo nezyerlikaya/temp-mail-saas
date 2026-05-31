@@ -9,6 +9,7 @@ use App\Console\Commands\MonitoringIncidentReviewCommand;
 use App\Console\Commands\OperationsCollectMetricsCommand;
 use App\Console\Commands\OperationsHealthSummaryCommand;
 use App\Console\Commands\ProviderActivationStatusCommand;
+use App\Console\Commands\SystemDeploymentReadinessCommand;
 use App\Console\Commands\SystemFirstLiveCheckCommand;
 use App\Console\Commands\SystemGoLiveStatusCommand;
 use App\Console\Commands\SystemHealthCheckCommand;
@@ -48,6 +49,7 @@ return Application::configure(basePath: dirname(__DIR__))
         OperationsCollectMetricsCommand::class,
         OperationsHealthSummaryCommand::class,
         ProviderActivationStatusCommand::class,
+        SystemDeploymentReadinessCommand::class,
         SystemFirstLiveCheckCommand::class,
         SystemGoLiveStatusCommand::class,
         SystemHealthCheckCommand::class,

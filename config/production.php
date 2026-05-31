@@ -112,6 +112,31 @@ return [
         'scheduler_required' => env('FIRST_LIVE_SCHEDULER_REQUIRED', false),
         'queue_worker_required' => env('FIRST_LIVE_QUEUE_WORKER_REQUIRED', false),
     ],
+    'deployment_readiness' => [
+        'queue' => [
+            'require_worker_driver' => env('DEPLOYMENT_REQUIRE_WORKER_DRIVER', true),
+            'workers_documented' => env('DEPLOYMENT_QUEUE_WORKERS_DOCUMENTED', true),
+            'restart_strategy_documented' => env('DEPLOYMENT_QUEUE_RESTART_DOCUMENTED', true),
+            'failed_jobs_strategy_documented' => env('DEPLOYMENT_FAILED_JOBS_DOCUMENTED', true),
+            'supervisor_compatibility_documented' => env('DEPLOYMENT_SUPERVISOR_NOTES_DOCUMENTED', true),
+        ],
+        'scheduler' => [
+            'cron_requirements_documented' => env('DEPLOYMENT_CRON_DOCUMENTED', true),
+            'scheduler_ready' => env('DEPLOYMENT_SCHEDULER_READY', true),
+            'cleanup_schedule_documented' => env('DEPLOYMENT_CLEANUP_SCHEDULE_DOCUMENTED', true),
+            'monitoring_schedule_documented' => env('DEPLOYMENT_MONITORING_SCHEDULE_DOCUMENTED', true),
+        ],
+        'provider' => [
+            'name' => env('DEPLOYMENT_PROVIDER', 'mailgun'),
+            'rollback_documented' => env('DEPLOYMENT_PROVIDER_ROLLBACK_DOCUMENTED', true),
+        ],
+        'domain' => [
+            'mx_checklist' => env('DEPLOYMENT_DOMAIN_MX_CHECKLIST', true),
+            'spf_checklist' => env('DEPLOYMENT_DOMAIN_SPF_CHECKLIST', true),
+            'dkim_checklist' => env('DEPLOYMENT_DOMAIN_DKIM_CHECKLIST', true),
+            'dmarc_checklist' => env('DEPLOYMENT_DOMAIN_DMARC_CHECKLIST', true),
+        ],
+    ],
     'rc3' => [
         'target' => env('RC3_CERTIFICATION_TARGET', 'rc3'),
         'provider' => env('RC3_CERTIFICATION_PROVIDER', 'mailgun'),
