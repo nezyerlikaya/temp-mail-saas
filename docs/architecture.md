@@ -101,6 +101,42 @@ The configuration services are designed for a future installer without adding on
 
 The `/admin` route space remains reserved and unimplemented. Future admin work should consume `AppConfigService`, `FeatureFlagService`, `EnvironmentService`, and `HealthCheckService` rather than duplicating configuration or health logic.
 
+## STEP03 User Account Foundation
+
+STEP03 adds schema and model foundations for future member authentication, premium plans, API access, avatars, sessions, and RBAC. It does not add login screens, registration, public profiles, staff authentication, roles, or billing behavior.
+
+The original Laravel users migration remains unchanged. A follow-up migration safely adds nullable or defaulted account fields:
+
+- Identity: username, display name, and public slug.
+- Account state: status, last login time, and last seen time.
+- Avatar metadata: disk, path, MIME type, size, hash, and update time.
+- Preferences: locale and timezone.
+- Security preparation: two-factor state and password change time.
+- Compatibility fields: account tier and API access state.
+
+Usernames and public slugs are nullable and uniquely indexed. Avatar images are never stored as database blobs.
+
+## Username Strategy
+
+`App\Services\User\UsernameService` normalizes usernames to lowercase, trims surrounding whitespace, converts spaces to dashes, and allows letters, numbers, dashes, and underscores. Usernames must be between 3 and 32 characters and may not use reserved platform names such as `admin`, `support`, `api`, `status`, or `health`.
+
+The username service performs no database writes. Future registration and profile services may use its normalized slug suggestion before checking persistence-level uniqueness.
+
+## Avatar Metadata Strategy
+
+`App\Services\User\AvatarMetadataService` represents avatar metadata without storing binary image data. It provides a default SVG fallback and uses Laravel storage disks when avatar metadata exists. Upload validation, image processing, and storage lifecycle behavior remain out of scope for STEP03.
+
+## Privacy-Safe Profiles
+
+`App\DTOs\User\UserProfileData` provides a public-safe profile representation for future UI and API surfaces. It includes only the user ID, username, display name, public slug, avatar URL, account tier, and status. Email is intentionally excluded by default.
+
+## Future Compatibility
+
+- Authentication can be layered onto the existing Laravel `User` model without changing the public routes.
+- RBAC can add role and permission tables later without placing a role column on users.
+- Billing can add subscription models later without storing provider identifiers on users.
+- API tokens can be introduced later without enabling API business endpoints in STEP03.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:
