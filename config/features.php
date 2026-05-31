@@ -39,6 +39,10 @@ return [
         'enabled' => env('FEATURE_INBOUND_ENABLED', false),
     ],
 
+    'public_inbox' => [
+        'enabled' => env('FEATURE_PUBLIC_INBOX_ENABLED', true),
+    ],
+
     'custom_domains' => [
         'enabled' => env('FEATURE_CUSTOM_DOMAINS_ENABLED', false),
     ],

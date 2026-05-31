@@ -19,6 +19,12 @@ return [
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
     'timezone' => env('APP_TIMEZONE', 'UTC'),
 
+    'public_inbox' => [
+        'mailbox_local_part_length' => env('PUBLIC_INBOX_LOCAL_PART_LENGTH', 12),
+        'mailbox_session_key' => env('PUBLIC_INBOX_SESSION_KEY', 'public_inbox.mailbox'),
+        'polling_interval_ms' => env('PUBLIC_INBOX_POLLING_INTERVAL_MS', 15000),
+    ],
+
     'localization' => [
         'enabled' => env('FEATURE_LOCALIZATION_ENABLED', true),
         'default_locale' => env('APP_LOCALE', 'en'),

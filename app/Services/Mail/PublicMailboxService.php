@@ -1,0 +1,127 @@
+<?php
+
+namespace App\Services\Mail;
+
+use App\Services\Service;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+final class PublicMailboxService extends Service
+{
+    private const RESERVED_PARTS = [
+        'admin',
+        'api',
+        'billing',
+        'help',
+        'hostmaster',
+        'postmaster',
+        'root',
+        'security',
+        'support',
+        'webmaster',
+    ];
+
+    public function current(Request $request): ?string
+    {
+        $address = $request->session()->get($this->sessionKey());
+
+        return is_string($address) ? $this->normalize($address) : null;
+    }
+
+    public function generate(Request $request): string
+    {
+        $address = $this->makeAddress();
+        $request->session()->put($this->sessionKey(), $address);
+
+        return $address;
+    }
+
+    public function rotate(Request $request): string
+    {
+        return $this->generate($request);
+    }
+
+    public function forget(Request $request): void
+    {
+        $request->session()->forget($this->sessionKey());
+    }
+
+    public function normalize(string $address): ?string
+    {
+        $address = Str::lower(trim($address));
+
+        if (! filter_var($address, FILTER_VALIDATE_EMAIL)) {
+            return null;
+        }
+
+        [$local, $domain] = explode('@', $address, 2);
+
+        if (! $this->domainAllowed($domain)) {
+            return null;
+        }
+
+        if (! preg_match('/^[a-z0-9][a-z0-9._-]*[a-z0-9]$/', $local)) {
+            return null;
+        }
+
+        return $local.'@'.$domain;
+    }
+
+    public function allowedDomains(): array
+    {
+        $domains = config('domains.public_mailbox.allowed_domains', []);
+        $domains = is_array($domains) ? $domains : [];
+        $domains = array_values(array_unique(array_filter(array_map(
+            fn (mixed $domain): string => Str::lower(trim((string) $domain)),
+            $domains,
+        ))));
+
+        return $domains ?: [$this->defaultDomain()];
+    }
+
+    public function defaultDomain(): string
+    {
+        $domain = Str::lower(trim((string) config('domains.public_mailbox.default_domain', 'example.test')));
+
+        return $domain !== '' ? $domain : 'example.test';
+    }
+
+    private function makeAddress(): string
+    {
+        do {
+            $local = $this->makeLocalPart();
+        } while (in_array($local, self::RESERVED_PARTS, true));
+
+        return $local.'@'.$this->selectDomain();
+    }
+
+    private function makeLocalPart(): string
+    {
+        $length = max(8, min(32, (int) config('tempmail.public_inbox.mailbox_local_part_length', 12)));
+        $alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        $part = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $part .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+        }
+
+        return $part;
+    }
+
+    private function selectDomain(): string
+    {
+        $domains = $this->allowedDomains();
+
+        return $domains[array_rand($domains)];
+    }
+
+    private function domainAllowed(string $domain): bool
+    {
+        return in_array(Str::lower($domain), $this->allowedDomains(), true);
+    }
+
+    private function sessionKey(): string
+    {
+        return (string) config('tempmail.public_inbox.mailbox_session_key', 'public_inbox.mailbox');
+    }
+}

@@ -12,6 +12,13 @@ return [
     */
 
     'default_status' => 'inactive',
+    'public_mailbox' => [
+        'default_domain' => env('PUBLIC_MAILBOX_DOMAIN', 'example.test'),
+        'allowed_domains' => array_filter(array_map(
+            'trim',
+            explode(',', env('PUBLIC_MAILBOX_ALLOWED_DOMAINS', env('PUBLIC_MAILBOX_DOMAIN', 'example.test'))),
+        )),
+    ],
     'verification' => [
         'enabled' => false,
     ],

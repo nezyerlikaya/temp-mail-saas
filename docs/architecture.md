@@ -494,6 +494,62 @@ STEP11 does not automatically migrate. Migration and seed execution remain expli
 
 The installer middleware avoids redirect loops by allowing installer paths through and by keeping the current public, auth, localization, RBAC, media, content, and mail foundations unchanged.
 
+## STEP12 Public Inbox UI Foundation
+
+STEP12 adds a public temporary inbox foundation using Blade, Alpine.js, and Tailwind CSS. It does not add real inbound providers, webhooks, SMTP, IMAP, MIME parsing, attachment downloads, API business endpoints, billing limits, admin mail UI, or persistent mailbox ownership.
+
+Public routes are:
+
+- `GET /inbox`
+- `POST /inbox/generate`
+- `POST /inbox/rotate`
+- `POST /inbox/forget`
+- `GET /inbox/messages`
+- `GET /inbox/messages/{uuid}`
+
+The JSON routes are public read-side foundations only and return data for the current session mailbox.
+
+## Session-Based Mailbox Strategy
+
+`App\Services\Mail\PublicMailboxService` creates a temporary mailbox address and stores it in the session. The generated local part is random, lowercase, alphanumeric, bounded by configuration, and avoids reserved operational names where practical. Domains are selected only from `config/domains.php`, so users cannot inject arbitrary recipient domains.
+
+No mailbox table exists yet. This keeps STEP12 lightweight and compatible with anonymous public inbox usage while leaving room for future persistent mailbox history, user-owned mailboxes, retention rules, and billing limits.
+
+## Public Inbox Configuration
+
+STEP12 adds configuration placeholders for:
+
+- Default public mailbox domain.
+- Allowed public mailbox domains.
+- Mailbox local part length.
+- Mailbox session key.
+- Polling interval.
+- Public inbox feature flag.
+
+The domain pool is config-backed only. A future domain module can replace this with database-backed inventory without changing controller behavior because mailbox generation is already behind a service boundary.
+
+## Message Read Boundary
+
+`App\Services\Mail\PublicInboxMessageService` reads from the STEP09 email message tables and returns public-safe DTO arrays. It filters by the current session mailbox and hides quarantined, expired, deleted, and already-expired messages. It never returns internal database IDs, foreign keys, storage disks, storage paths, checksums, raw provider payloads, or raw MIME data.
+
+List responses use `PublicInboxMessageData`. Detail responses use `PublicInboxMessageDetailData`. Attachments are represented only as safe metadata placeholders; downloads and previews remain out of scope.
+
+## Safe HTML Rendering Boundary
+
+The public inbox never renders raw `html_body`. Detail JSON prefers `sanitized_html_body` when it exists and falls back to escaped text body in the UI. The Blade and Alpine foundation do not use raw Blade HTML output for email content, do not iframe messages, do not auto-load remote images, and do not execute scripts.
+
+STEP12 does not implement a sanitizer engine. It preserves the boundary so a future MIME/sanitization step can populate `sanitized_html_body` safely before public rendering.
+
+## Polling And Realtime Compatibility
+
+The inbox page includes an Alpine.js polling foundation using the configured polling interval and a manual refresh button. Polling is rate-limited through Laravel's `RateLimiter`, which works on shared hosting with the existing cache driver.
+
+Future realtime delivery through WebSockets, Reverb, server-sent events, or provider webhooks can reuse the same read service and DTOs. Polling remains the fallback path for shared-hosting deployments.
+
+## Future Cleanup Compatibility
+
+Because the session stores only the current mailbox address, cleanup can continue to operate at the message-retention layer from STEP09 and STEP10. Future mailbox cleanup, user-owned inbox history, domain rotation, billing limits, and abuse controls can be added without changing the anonymous public route contract introduced in STEP12.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:
