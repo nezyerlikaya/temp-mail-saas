@@ -329,6 +329,44 @@ The media foundation is CDN-ready because storage paths, visibility, disk, and s
 
 Mailbox attachments can later reuse the same metadata table while keeping attachment downloads, authorization, quarantine, and retention policies in dedicated future modules.
 
+## STEP08 Content Foundation
+
+STEP08 adds metadata and service foundations for future pages, posts, announcements, help center content, SEO content, and marketing pages. It does not implement an editor, admin content screens, blog frontend, media picker, revision history, comments, search, or content API.
+
+The `contents` table stores:
+
+- Identity: integer ID and UUID.
+- Content fields: title, slug, excerpt, and body content.
+- Classification: content type and status.
+- Publishing metadata: nullable `published_at`.
+- Staff author relationship through `author_staff_id`.
+- SEO fields: meta title and meta description.
+- Media compatibility through nullable `featured_media_id`.
+- Localization compatibility through nullable `locale`.
+
+Indexes are prepared for slug, type, status, and locale.
+
+## Content Slug Strategy
+
+`App\Services\Content\ContentSlugService` normalizes titles into URL-safe slugs using the configured separator from `config/content.php`. It checks uniqueness while allowing locale-aware slug reuse, so future multilingual content can use the same slug in different locales when appropriate.
+
+## Publishing Lifecycle
+
+`App\Services\Content\ContentService` owns content creation and status transitions:
+
+- New content starts as draft.
+- Draft content can be published.
+- Draft or published content can be archived.
+- Archived content cannot transition back in STEP08.
+
+These conservative rules give future controllers and admin screens a stable service boundary.
+
+## SEO, Localization, And Media Compatibility
+
+SEO fields are stored directly on content records but are not rendered publicly yet. Locale is nullable for global content and future localized content variants. Featured media references the media metadata foundation from STEP07, allowing future content modules to attach images without creating a media picker now.
+
+`App\DTOs\Content\ContentData` exposes only safe presentation fields: title, slug, status, type, and published timestamp. Internal metadata such as author IDs, media IDs, and SEO fields are intentionally excluded.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:
