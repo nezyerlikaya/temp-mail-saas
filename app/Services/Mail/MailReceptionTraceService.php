@@ -67,6 +67,46 @@ final class MailReceptionTraceService extends Service
         return $this->trace(mailboxAddress: $mailbox);
     }
 
+    public function readinessReview(
+        ?string $intakeUuid = null,
+        ?string $providerMessageId = null,
+        ?string $messageUuid = null,
+        ?string $mailboxAddress = null,
+    ): array {
+        if (blank($intakeUuid) && blank($providerMessageId) && blank($messageUuid) && blank($mailboxAddress)) {
+            $review = [
+                'status' => 'pending',
+                'summary' => $this->traceSummary($this->lifecycle(null, null)),
+                'blockers' => [],
+                'warnings' => [$this->readinessIssue('trace_pending', 'First live mail trace is pending the first message.')],
+            ];
+            $this->traceReviewed($review);
+
+            return $review;
+        }
+
+        $trace = $this->trace($intakeUuid, $providerMessageId, $messageUuid, $mailboxAddress);
+        $lifecycle = $trace['lifecycle'];
+        $checks = [
+            $this->readinessCheck('intake_accepted', $lifecycle['inbound_intake'], 'require_intake_accepted'),
+            $this->readinessCheck('intake_queued', $lifecycle['queued_job'], 'require_intake_queued'),
+            $this->readinessCheck('intake_processed', $trace['intake']['processed_at'] ?? null, 'require_intake_processed'),
+            $this->readinessCheck('message_stored', $lifecycle['email_message_storage'], 'require_message_stored'),
+            $this->readinessCheck('inbox_visible', $lifecycle['public_inbox_visibility'], 'require_inbox_visible'),
+        ];
+        $blockers = collect($checks)->where('classification', 'blocker')->values()->all();
+        $warnings = collect($checks)->where('classification', 'warning')->values()->all();
+        $review = [
+            'status' => $blockers !== [] ? 'blocked' : ($warnings !== [] ? 'warning' : 'ready'),
+            'summary' => $this->traceSummary($lifecycle),
+            'blockers' => $blockers,
+            'warnings' => $warnings,
+        ];
+        $this->traceReviewed($review);
+
+        return $review;
+    }
+
     private function findIntake(?string $uuid, ?string $providerMessageId): ?InboundMailIntake
     {
         if (filled($uuid)) {
@@ -184,6 +224,54 @@ final class MailReceptionTraceService extends Service
             'email_message_storage' => $message instanceof EmailMessage,
             'public_inbox_visibility' => $message instanceof EmailMessage && $this->visible($message),
         ];
+    }
+
+    private function readinessCheck(string $name, mixed $passed, string $configKey): array
+    {
+        $required = (bool) config("mail-providers.first_live_mail.trace.{$configKey}", true);
+
+        return [
+            'name' => $name,
+            'passed' => (bool) $passed,
+            'classification' => $passed ? 'passed' : ($required ? 'blocker' : 'warning'),
+            'message' => $passed ? str($name)->replace('_', ' ')->headline().' is ready.' : str($name)->replace('_', ' ')->headline().' is not ready.',
+        ];
+    }
+
+    private function readinessIssue(string $name, string $message): array
+    {
+        return compact('name', 'message') + [
+            'passed' => false,
+            'classification' => 'warning',
+        ];
+    }
+
+    private function traceSummary(array $lifecycle): array
+    {
+        return [
+            'intake_accepted' => (bool) $lifecycle['inbound_intake'],
+            'intake_queued' => (bool) $lifecycle['queued_job'],
+            'intake_processed' => (bool) ($lifecycle['email_message_storage'] && $lifecycle['queued_job']),
+            'message_stored' => (bool) $lifecycle['email_message_storage'],
+            'inbox_visible' => (bool) $lifecycle['public_inbox_visibility'],
+        ];
+    }
+
+    private function traceReviewed(array $review): void
+    {
+        $this->operations->log(
+            OperationCategory::Mail,
+            'first_live_mail_trace_reviewed',
+            $review['status'] === 'blocked' ? OperationSeverity::Warning : OperationSeverity::Info,
+            OperationStatus::Detected,
+            'first-live-mail-readiness',
+            'First live mail trace readiness reviewed.',
+            [
+                'status' => $review['status'],
+                'blocker_count' => count($review['blockers']),
+                'warning_count' => count($review['warnings']),
+            ],
+        );
     }
 
     private function visible(EmailMessage $message): bool

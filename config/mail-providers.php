@@ -94,6 +94,34 @@ return [
         ],
     ],
 
+    'first_live_mail' => [
+        'provider' => env('FIRST_LIVE_MAIL_PROVIDER', 'mailgun'),
+        'domain' => env('FIRST_LIVE_MAIL_DOMAIN'),
+        'require_worker_queue' => env('FIRST_LIVE_MAIL_REQUIRE_WORKER_QUEUE', true),
+        'queues' => [
+            'intake' => env('FIRST_LIVE_MAIL_INTAKE_QUEUE', env('INBOUND_QUEUE_NAME', 'inbound-mail')),
+            'processing' => env('FIRST_LIVE_MAIL_PROCESSING_QUEUE', env('INBOUND_QUEUE_NAME', 'inbound-mail')),
+            'cleanup' => env('FIRST_LIVE_MAIL_CLEANUP_QUEUE', 'cleanup'),
+            'automation' => env('FIRST_LIVE_MAIL_AUTOMATION_QUEUE', 'automation'),
+        ],
+        'safety' => [
+            'retry_ready' => env('FIRST_LIVE_MAIL_RETRY_READY', true),
+            'duplicate_ready' => env('FIRST_LIVE_MAIL_DUPLICATE_READY', true),
+            'replay_ready' => env('FIRST_LIVE_MAIL_REPLAY_READY', true),
+        ],
+        'diagnostics' => [
+            'observability_ready' => env('FIRST_LIVE_MAIL_OBSERVABILITY_READY', true),
+            'rollback_ready' => env('FIRST_LIVE_MAIL_ROLLBACK_READY', true),
+        ],
+        'trace' => [
+            'require_intake_accepted' => env('FIRST_LIVE_TRACE_REQUIRE_INTAKE_ACCEPTED', true),
+            'require_intake_queued' => env('FIRST_LIVE_TRACE_REQUIRE_INTAKE_QUEUED', true),
+            'require_intake_processed' => env('FIRST_LIVE_TRACE_REQUIRE_INTAKE_PROCESSED', true),
+            'require_message_stored' => env('FIRST_LIVE_TRACE_REQUIRE_MESSAGE_STORED', true),
+            'require_inbox_visible' => env('FIRST_LIVE_TRACE_REQUIRE_INBOX_VISIBLE', true),
+        ],
+    ],
+
     'webhooks' => [
         'enabled' => env('MAIL_PROVIDER_WEBHOOKS_ENABLED', true),
         'paths' => [
