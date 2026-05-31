@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\WebhookStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'subscribed_events',
     'last_delivery_at',
 ])]
+#[Hidden(['secret_hash'])]
 class OutboundWebhook extends Model
 {
     public function user(): BelongsTo

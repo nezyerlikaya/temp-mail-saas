@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\UserIntegrationStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'connected_at',
     'disconnected_at',
 ])]
+#[Hidden(['configuration'])]
 class UserIntegration extends Model
 {
     public function integration(): BelongsTo

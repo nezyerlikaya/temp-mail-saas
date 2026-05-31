@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\BillingProvider;
 use App\Enums\BillingSubscriptionStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -23,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'canceled_at',
     'metadata',
 ])]
+#[Hidden(['provider_subscription_id'])]
 class BillingSubscription extends Model
 {
     public function customer(): BelongsTo

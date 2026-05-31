@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\BillingProvider;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'email',
     'metadata',
 ])]
+#[Hidden(['provider_customer_id'])]
 class BillingCustomer extends Model
 {
     public function user(): BelongsTo

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\EmailAttachmentScanStatus;
 use App\Enums\EmailAttachmentStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'scan_status',
     'status',
 ])]
+#[Hidden(['checksum', 'storage_path'])]
 class EmailAttachment extends Model
 {
     public function message(): BelongsTo

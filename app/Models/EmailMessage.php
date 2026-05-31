@@ -6,6 +6,7 @@ use App\Enums\EmailMessageStatus;
 use App\Enums\EmailParseStatus;
 use App\Enums\RetentionTier;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -38,6 +39,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'processed_at',
     'failed_at',
 ])]
+#[Hidden(['html_body', 'intake_key'])]
 class EmailMessage extends Model
 {
     use SoftDeletes;

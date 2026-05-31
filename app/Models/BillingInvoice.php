@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\BillingInvoiceStatus;
 use App\Enums\BillingProvider;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -23,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'issued_at',
     'paid_at',
 ])]
+#[Hidden(['provider_invoice_id'])]
 class BillingInvoice extends Model
 {
     public function customer(): BelongsTo

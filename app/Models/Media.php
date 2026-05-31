@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\MediaStatus;
 use App\Enums\MediaVisibility;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -27,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'storage_driver',
     'storage_path',
 ])]
+#[Hidden(['checksum', 'storage_path'])]
 class Media extends Model
 {
     public function uploadedByUser(): BelongsTo

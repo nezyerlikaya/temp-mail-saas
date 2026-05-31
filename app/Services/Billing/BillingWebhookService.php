@@ -87,10 +87,24 @@ final class BillingWebhookService extends Service
         string $payload,
         bool $signatureValid,
     ): BillingWebhookEvent {
+        $payloadHash = hash('sha256', $payload);
+
         if ($eventId !== null) {
             $existing = BillingWebhookEvent::query()
                 ->where('provider', $provider)
                 ->where('event_id', $eventId)
+                ->first();
+
+            if ($existing instanceof BillingWebhookEvent) {
+                return $existing;
+            }
+        }
+
+        if ($eventId === null) {
+            $existing = BillingWebhookEvent::query()
+                ->where('provider', $provider)
+                ->where('event_type', $eventType)
+                ->where('payload_hash', $payloadHash)
                 ->first();
 
             if ($existing instanceof BillingWebhookEvent) {
@@ -105,7 +119,7 @@ final class BillingWebhookService extends Service
             'event_type' => $eventType,
             'signature_valid' => $signatureValid,
             'status' => BillingWebhookStatus::Received,
-            'payload_hash' => hash('sha256', $payload),
+            'payload_hash' => $payloadHash,
         ]);
     }
 }
