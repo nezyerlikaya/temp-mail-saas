@@ -66,6 +66,11 @@ return [
             'webhooks.view' => 'View outbound webhooks',
             'webhooks.manage' => 'Manage outbound webhooks',
         ],
+        'automation' => [
+            'automation.view' => 'View automation',
+            'automation.manage' => 'Manage automation',
+            'intelligence.view' => 'View intelligence scores',
+        ],
     ],
 
     'roles' => [
@@ -105,6 +110,9 @@ return [
                 'integrations.manage',
                 'webhooks.view',
                 'webhooks.manage',
+                'automation.view',
+                'automation.manage',
+                'intelligence.view',
             ],
         ],
         'support' => [
@@ -125,6 +133,8 @@ return [
                 'localization.export',
                 'integrations.view',
                 'webhooks.view',
+                'automation.view',
+                'intelligence.view',
             ],
         ],
         'moderator' => [

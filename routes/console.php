@@ -37,3 +37,27 @@ if (config('operations.metrics.schedule_enabled', false)) {
         default => $operations->hourly(),
     };
 }
+
+if (config('automation.schedule.automation_evaluation_enabled', false)) {
+    $automation = Schedule::call(fn () => app(\App\Services\Automation\AutomationEngine::class)
+        ->evaluate(\App\Enums\AutomationTriggerType::ScheduledEvent, ['scheduled' => true], 'scheduler'))
+        ->name('automation:evaluate-scheduled')
+        ->withoutOverlapping();
+
+    match ((string) config('automation.schedule.automation_evaluation_frequency', 'hourly')) {
+        'daily' => $automation->daily(),
+        default => $automation->hourly(),
+    };
+}
+
+if (config('automation.schedule.intelligence_recalculation_enabled', false)) {
+    $intelligence = Schedule::call(fn () => app(\App\Services\Automation\IntelligenceService::class)
+        ->recalculateOperationalScores())
+        ->name('automation:recalculate-intelligence')
+        ->withoutOverlapping();
+
+    match ((string) config('automation.schedule.intelligence_recalculation_frequency', 'hourly')) {
+        'daily' => $intelligence->daily(),
+        default => $intelligence->hourly(),
+    };
+}

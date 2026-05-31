@@ -1465,6 +1465,106 @@ The marketplace remains infrastructure-only. Categories, version metadata, compa
 
 No public marketplace UI, connector billing, OAuth provider, external API integration, or app-store behavior is introduced in STEP25.
 
+## STEP26 Advanced Intelligence And Automation Foundation
+
+STEP26 adds a safe automation and intelligence layer without external AI providers, generated content, machine learning models, vector databases, embeddings, or recommendation UI.
+
+## Automation Architecture
+
+Automation is represented by two persistence models:
+
+- `automation_rules`
+- `automation_executions`
+
+Rules define a trigger type, optional structured condition group, action type, priority, status, and metadata. Executions record the audit trail for matched rules, including trigger source, status, result summary, timestamps, and sanitized metadata.
+
+Rules are intentionally data-driven. They do not store executable code, scripts, closures, or arbitrary callbacks.
+
+## Rule Engine Strategy
+
+`AutomationEngine` consumes a trigger type and a privacy-safe payload, finds active matching rules, evaluates conditions, creates execution records, and delegates internal action handling to `AutomationExecutionService`.
+
+`RuleEvaluator` supports deterministic condition groups:
+
+- `all`
+- `any`
+- Single condition objects
+
+Supported operators are limited to safe comparisons such as equals, not equals, numeric comparisons, contains, in, and exists. Field access is limited to simple dot paths and does not execute expressions.
+
+## Execution Strategy
+
+`AutomationExecutionService` creates execution records, marks them running, performs internal action preparation, then records completed or failed status.
+
+STEP26 action types are foundation placeholders:
+
+- Notify
+- Log
+- Score
+- Tag
+- Queue job
+
+No destructive actions, outbound calls, provider calls, or arbitrary job dispatching are performed in this step. Sensitive payload fields such as secrets, tokens, raw payloads, content, and passwords are excluded from execution metadata.
+
+## Intelligence Scoring Strategy
+
+`IntelligenceService` records bounded 0-100 scores in `intelligence_scores`.
+
+Initial scoring support covers:
+
+- Abuse risk
+- Domain health
+- Queue health
+
+The score table is generic enough for future engagement, retention, deliverability, usage, and recommendation signals. Scores store reference type and reference ID, but do not store raw source payloads.
+
+## Event-Driven Architecture
+
+The automation engine can consume existing foundation records:
+
+- Abuse events
+- Operations events
+- Domain health checks
+- Billing webhook events
+- Queue metrics
+
+Each event type maps to an `AutomationTriggerType`, allowing future modules to emit or consume automation triggers without changing the source module schemas.
+
+## Scheduler Foundation
+
+`config/automation.php` includes disabled-by-default scheduler switches for:
+
+- Scheduled automation evaluation
+- Intelligence recalculation
+
+`routes/console.php` registers schedule callbacks only when those config switches are enabled. This keeps shared-hosting deployments quiet by default while preserving a VPS-friendly path for scheduled workers.
+
+## AI Readiness Strategy
+
+STEP26 prepares an AI-compatible boundary without implementing AI:
+
+- Scores are structured and referenceable.
+- Automation outcomes are auditable.
+- Conditions are deterministic and explainable.
+- Raw payloads are intentionally excluded.
+- External AI is disabled in configuration.
+
+Future AI providers can be added behind dedicated services and permission gates without replacing the automation tables, execution history, or scoring model.
+
+## Future Recommendation Systems
+
+Future recommendation features can read from `intelligence_scores`, automation execution summaries, operations events, abuse events, and billing/domain signals. Recommendations should remain explainable, permission-gated, and privacy-safe, with UI and provider integrations added as separate modules.
+
+## RBAC Integration
+
+STEP26 adds these permissions:
+
+- `automation.view`
+- `automation.manage`
+- `intelligence.view`
+
+No UI is introduced in STEP26. Future admin or API surfaces should enforce these permissions server-side.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:
