@@ -1659,3 +1659,34 @@ The operations dashboard was tuned to reduce repeated count queries by grouping 
 Public inbox listing now uses the performance-configured polling limit while preserving the existing response shape and privacy guarantees.
 
 Domain pool selection now respects a configurable minimum health threshold and keeps its existing fallback domain behavior when inventory is empty or inactive.
+
+## STEP34 Production Operations And Monitoring
+
+STEP34 adds a vendor-neutral production monitoring foundation while preserving the existing modular monolith architecture.
+
+New metadata-only operational tables:
+
+- `incidents`
+- `monitoring_alerts`
+
+Incidents track operational impact using category, severity, status, title, summary, detection time, optional resolution time, and sanitized metadata. Monitoring alerts track source, alert type, severity, status, message, trigger time, and lifecycle timestamps.
+
+`IncidentService` owns incident creation, acknowledgement, resolution, severity handling, categorization, and metadata sanitization.
+
+`MonitoringService` aggregates existing signals from:
+
+- Queue metrics.
+- Provider operations events.
+- API usage logs.
+- Billing webhook events.
+
+It creates deduplicated active alerts and can create incidents for critical alerts. It does not send external notifications and does not store raw payloads or secrets.
+
+`UptimeReadinessService` checks whether the health/status routes and operational tracking tables are available. This keeps uptime readiness internal and shared-hosting compatible.
+
+STEP34 adds safe console commands:
+
+- `monitoring:health-review`
+- `monitoring:incident-review`
+
+Runbooks live under `docs/runbooks` and cover queue failures, provider failures, billing webhook failures, and incident response.

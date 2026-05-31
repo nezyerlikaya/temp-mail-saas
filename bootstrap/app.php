@@ -1,6 +1,8 @@
 <?php
 
 use App\Console\Commands\CleanupExpiredMailCommand;
+use App\Console\Commands\MonitoringHealthReviewCommand;
+use App\Console\Commands\MonitoringIncidentReviewCommand;
 use App\Console\Commands\OperationsCollectMetricsCommand;
 use App\Console\Commands\OperationsHealthSummaryCommand;
 use App\Console\Commands\SystemHealthCheckCommand;
@@ -27,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands([
         CleanupExpiredMailCommand::class,
+        MonitoringHealthReviewCommand::class,
+        MonitoringIncidentReviewCommand::class,
         OperationsCollectMetricsCommand::class,
         OperationsHealthSummaryCommand::class,
         SystemHealthCheckCommand::class,
