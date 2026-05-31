@@ -1854,3 +1854,13 @@ STEP42 adds a no-traffic load validation framework for production readiness revi
 `LoadScenarioService` documents scenarios such as inbox creation volume, inbox polling, provider intake, queue backlog, and provider failure checks. Scenarios are documentation-only and never generate load.
 
 `system:load-readiness` prints safe blocker, warning, recommendation, and scenario summaries.
+
+## STEP43 Launch Candidate RC3
+
+STEP43 adds a unified launch certification layer without deploying the application.
+
+`RC3CertificationService` aggregates security, staging, provider, domain, first-real-mail, load, monitoring, go-live, operational, and system foundation readiness. It classifies the candidate as `certified`, `warning`, or `blocked`.
+
+`LaunchBlockerReviewService` normalizes blockers and warnings with severity, ownership, category, and recommendations. `system:rc3-certification` prints a safe certification summary.
+
+RC3 certification records `rc3_certification_started`, `rc3_certification_passed`, `rc3_certification_warning`, and `rc3_certification_blocked` operations events without sensitive metadata.
