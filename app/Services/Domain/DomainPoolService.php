@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Throwable;
 
 final class DomainPoolService extends Service
 {
@@ -29,7 +30,11 @@ final class DomainPoolService extends Service
             return collect();
         }
 
-        $organization ??= $this->tenantContext->current(user: $user);
+        try {
+            $organization ??= $this->tenantContext->current(user: $user);
+        } catch (Throwable) {
+            $organization = null;
+        }
         $tiers = $this->eligibleTiers($user, $organization);
 
         return Domain::query()

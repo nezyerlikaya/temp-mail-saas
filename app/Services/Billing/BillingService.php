@@ -10,12 +10,17 @@ use App\Models\Organization;
 use App\Models\Plan;
 use App\Models\UserPlanAssignment;
 use App\Services\Service;
+use InvalidArgumentException;
 use Illuminate\Support\Str;
 
 final class BillingService extends Service
 {
     public function createOrUpdateCustomer(string $provider, array $data): BillingCustomer
     {
+        if (blank($data['provider_customer_id'] ?? null)) {
+            throw new InvalidArgumentException('Billing customer provider ID is required.');
+        }
+
         return BillingCustomer::query()->updateOrCreate(
             [
                 'provider' => $provider,
@@ -36,6 +41,10 @@ final class BillingService extends Service
 
     public function createOrUpdateSubscription(BillingCustomer $customer, string $provider, array $data): BillingSubscription
     {
+        if (blank($data['provider_subscription_id'] ?? null)) {
+            throw new InvalidArgumentException('Billing subscription provider ID is required.');
+        }
+
         $plan = $this->resolvePlan($data['provider_plan_id'] ?? null);
         $subscription = BillingSubscription::query()->updateOrCreate(
             [
@@ -67,6 +76,10 @@ final class BillingService extends Service
 
     public function createOrUpdateInvoice(BillingCustomer $customer, string $provider, array $data): BillingInvoice
     {
+        if (blank($data['provider_invoice_id'] ?? null)) {
+            throw new InvalidArgumentException('Billing invoice provider ID is required.');
+        }
+
         return BillingInvoice::query()->updateOrCreate(
             [
                 'provider' => $provider,
@@ -138,7 +151,9 @@ final class BillingService extends Service
                 || str_contains(Str::lower((string) $key), 'payment_method')
                 || str_contains(Str::lower((string) $key), 'secret')
                 || str_contains(Str::lower((string) $key), 'token'))
-            ->map(fn (mixed $value): mixed => is_array($value) ? $this->sanitizeMetadata($value) : $value)
+            ->map(fn (mixed $value): mixed => is_array($value)
+                ? $this->sanitizeMetadata($value)
+                : (is_scalar($value) || $value === null ? $value : null))
             ->all();
     }
 }

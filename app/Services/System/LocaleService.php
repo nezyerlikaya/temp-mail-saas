@@ -134,9 +134,9 @@ final class LocaleService extends Service
         return true;
     }
 
-    private function normalize(string $locale): string
+    private function normalize(mixed $locale): string
     {
-        return strtolower(str_replace('_', '-', trim($locale)));
+        return strtolower(str_replace('_', '-', trim((string) $locale)));
     }
 
     private function configuredDefaultLocale(): string
@@ -157,9 +157,9 @@ final class LocaleService extends Service
         $locales[] = $this->configuredFallbackLocale();
 
         return array_values(array_unique(array_filter(array_map(
-            fn (string $locale): string => $this->normalize($locale),
+            fn (mixed $locale): string => $this->normalize($locale),
             $locales,
-        ))));
+        ), fn (string $locale): bool => preg_match('/^[a-z]{2}(?:[-_][a-z]{2})?$/', $locale) === 1)));
     }
 
     private function configuredLanguageFallbacks(): array
