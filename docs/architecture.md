@@ -1753,3 +1753,22 @@ STEP36 adds a first-live validation package for the first production environment
 `system:first-live-check` aggregates environment, server, and smoke checks and outputs only safe status, blocker, and warning messages.
 
 First-live deployment guidance lives in `docs/deployment/first-live-environment.md`, and provider/domain validation guidance lives in `docs/deployment/provider-domain-validation.md`.
+
+## STEP37 Real Provider Sandbox Testing
+
+STEP37 prepares sandbox validation for Mailgun, Postmark, and Amazon SES without enabling live traffic or requiring production provider secrets.
+
+`config/mail-providers.php` includes sandbox options for sandbox enablement, test signature acceptance, allowed providers, replay window, payload logging, observability, and test-only signing keys.
+
+`ProviderSandboxValidationService` validates provider fixtures by simulating signatures, checking invalid signatures, auditing normalization output, creating queue-first intakes, processing storage through the existing mail pipeline, and confirming public inbox visibility.
+
+The service records privacy-safe operations events:
+
+- `sandbox_provider_validated`
+- `sandbox_provider_failed`
+- `sandbox_signature_rejected`
+- `sandbox_duplicate_detected`
+
+`mail:provider-sandbox-check` runs the validation from the console and prints only safe summaries. It does not print full payloads or secrets.
+
+Sandbox fixtures live under `tests/Fixtures/mail-providers` and use deterministic `example.test` addresses, fake message ids, and no personal data.

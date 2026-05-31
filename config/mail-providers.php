@@ -5,6 +5,24 @@ return [
 
     'signature_tolerance_seconds' => env('MAIL_PROVIDER_SIGNATURE_TOLERANCE_SECONDS', 300),
 
+    'sandbox' => [
+        'enabled' => env('MAIL_PROVIDER_SANDBOX_ENABLED', true),
+        'accept_test_signatures' => env('MAIL_PROVIDER_SANDBOX_ACCEPT_TEST_SIGNATURES', true),
+        'allowed_providers' => array_filter(array_map(
+            'trim',
+            explode(',', env('MAIL_PROVIDER_SANDBOX_ALLOWED_PROVIDERS', 'mailgun,postmark,amazon_ses,ses')),
+        )),
+        'replay_window_seconds' => env('MAIL_PROVIDER_SANDBOX_REPLAY_WINDOW_SECONDS', 300),
+        'payload_logging_enabled' => env('MAIL_PROVIDER_SANDBOX_PAYLOAD_LOGGING_ENABLED', false),
+        'observability_enabled' => env('MAIL_PROVIDER_SANDBOX_OBSERVABILITY_ENABLED', true),
+        'test_signing_keys' => [
+            'mailgun' => env('MAIL_PROVIDER_SANDBOX_MAILGUN_KEY', 'sandbox-mailgun-signing-key'),
+            'postmark' => env('MAIL_PROVIDER_SANDBOX_POSTMARK_KEY', 'sandbox-postmark-signing-key'),
+            'ses' => env('MAIL_PROVIDER_SANDBOX_SES_KEY', 'sandbox-ses-signing-key'),
+            'amazon_ses' => env('MAIL_PROVIDER_SANDBOX_SES_KEY', 'sandbox-ses-signing-key'),
+        ],
+    ],
+
     'webhooks' => [
         'enabled' => env('MAIL_PROVIDER_WEBHOOKS_ENABLED', true),
         'paths' => [

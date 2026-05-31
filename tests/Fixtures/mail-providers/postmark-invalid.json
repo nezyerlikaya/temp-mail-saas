@@ -1,0 +1,16 @@
+{
+  "provider": "postmark",
+  "case": "invalid",
+  "payload": {
+    "MessageID": "postmark-sandbox-invalid-001",
+    "OriginalRecipient": "sandbox-mailbox@example.test",
+    "From": "sender@example.test",
+    "Subject": "Postmark sandbox invalid",
+    "TextBody": "This fixture should be rejected.",
+    "Date": "SANDBOX_TIMESTAMP"
+  },
+  "headers": {
+    "X-Postmark-Webhook-Token": "invalid-token",
+    "X-Postmark-Timestamp": "SANDBOX_TIMESTAMP"
+  }
+}

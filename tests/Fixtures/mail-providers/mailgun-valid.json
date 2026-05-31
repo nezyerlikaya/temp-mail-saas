@@ -1,0 +1,25 @@
+{
+  "provider": "mailgun",
+  "case": "valid",
+  "payload": {
+    "timestamp": "SANDBOX_TIMESTAMP",
+    "token": "sandbox-mailgun-token",
+    "signature": "SANDBOX_SIGNATURE",
+    "recipient": "sandbox-mailbox@example.test",
+    "sender": "sender@example.test",
+    "from_name": "Sandbox Sender",
+    "subject": "Mailgun sandbox valid",
+    "body-plain": "Mailgun sandbox text body.",
+    "body-html": "<p>Mailgun sandbox HTML body.</p>",
+    "Message-Id": "mailgun-sandbox-valid-001",
+    "attachments": [
+      {
+        "name": "mailgun-note.txt",
+        "content-type": "text/plain",
+        "size": 32,
+        "checksum": "mailgun-fixture-checksum"
+      }
+    ]
+  },
+  "headers": {}
+}

@@ -1,0 +1,25 @@
+{
+  "provider": "postmark",
+  "case": "valid",
+  "payload": {
+    "MessageID": "postmark-sandbox-valid-001",
+    "OriginalRecipient": "sandbox-mailbox@example.test",
+    "From": "sender@example.test",
+    "FromName": "Sandbox Sender",
+    "Subject": "Postmark sandbox valid",
+    "TextBody": "Postmark sandbox text body.",
+    "HtmlBody": "<p>Postmark sandbox HTML body.</p>",
+    "Date": "SANDBOX_TIMESTAMP",
+    "Attachments": [
+      {
+        "Name": "postmark-note.txt",
+        "ContentType": "text/plain",
+        "Size": 48
+      }
+    ]
+  },
+  "headers": {
+    "X-Postmark-Webhook-Token": "SANDBOX_SIGNATURE",
+    "X-Postmark-Timestamp": "SANDBOX_TIMESTAMP"
+  }
+}

@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\CleanupExpiredMailCommand;
+use App\Console\Commands\MailProviderSandboxCheckCommand;
 use App\Console\Commands\MonitoringHealthReviewCommand;
 use App\Console\Commands\MonitoringIncidentReviewCommand;
 use App\Console\Commands\OperationsCollectMetricsCommand;
@@ -31,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands([
         CleanupExpiredMailCommand::class,
+        MailProviderSandboxCheckCommand::class,
         MonitoringHealthReviewCommand::class,
         MonitoringIncidentReviewCommand::class,
         OperationsCollectMetricsCommand::class,

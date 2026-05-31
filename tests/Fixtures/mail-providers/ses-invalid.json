@@ -1,0 +1,20 @@
+{
+  "provider": "ses",
+  "case": "invalid",
+  "payload": {
+    "MessageId": "ses-sandbox-invalid-001",
+    "Timestamp": "SANDBOX_TIMESTAMP",
+    "Signature": "invalid-signature",
+    "mail": {
+      "messageId": "ses-sandbox-invalid-001",
+      "timestamp": "SANDBOX_TIMESTAMP",
+      "source": "sender@example.test",
+      "destination": [
+        "sandbox-mailbox@example.test"
+      ]
+    },
+    "subject": "SES sandbox invalid",
+    "text_body": "This fixture should be rejected."
+  },
+  "headers": {}
+}

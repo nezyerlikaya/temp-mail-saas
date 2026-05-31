@@ -1,0 +1,26 @@
+{
+  "provider": "ses",
+  "case": "valid",
+  "payload": {
+    "MessageId": "ses-sandbox-valid-001",
+    "Timestamp": "SANDBOX_TIMESTAMP",
+    "Signature": "SANDBOX_SIGNATURE",
+    "mail": {
+      "messageId": "ses-sandbox-valid-001",
+      "timestamp": "SANDBOX_TIMESTAMP",
+      "source": "sender@example.test",
+      "destination": [
+        "sandbox-mailbox@example.test"
+      ]
+    },
+    "receipt": {
+      "recipients": [
+        "sandbox-mailbox@example.test"
+      ]
+    },
+    "subject": "SES sandbox valid",
+    "text_body": "SES sandbox text body.",
+    "html_body": "<p>SES sandbox HTML body.</p>"
+  },
+  "headers": {}
+}

@@ -1,0 +1,15 @@
+{
+  "provider": "mailgun",
+  "case": "invalid",
+  "payload": {
+    "timestamp": "SANDBOX_TIMESTAMP",
+    "token": "sandbox-mailgun-token",
+    "signature": "invalid-signature",
+    "recipient": "sandbox-mailbox@example.test",
+    "sender": "sender@example.test",
+    "subject": "Mailgun sandbox invalid",
+    "body-plain": "This fixture should be rejected.",
+    "Message-Id": "mailgun-sandbox-invalid-001"
+  },
+  "headers": {}
+}
