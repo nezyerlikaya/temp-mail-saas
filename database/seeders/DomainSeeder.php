@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\DomainAssignmentStrategy;
+use App\Enums\DomainOnboardingState;
 use App\Enums\DomainStatus;
 use App\Enums\DomainTier;
 use App\Enums\DomainType;
@@ -24,6 +25,7 @@ class DomainSeeder extends Seeder
                 [
                     'uuid' => Domain::query()->where('domain', $data['domain'])->value('uuid') ?: (string) Str::uuid(),
                     'status' => DomainStatus::Active,
+                    'onboarding_state' => DomainOnboardingState::Active,
                     'type' => $data['type'],
                     'tier' => $data['tier'],
                     'priority' => $data['priority'],

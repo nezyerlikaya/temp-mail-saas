@@ -1822,3 +1822,13 @@ Provider activation states are config-driven:
 - `provider_activation_suspended`
 
 `provider:activation-status` prints safe provider states, blocker counts, warning counts, and passed check counts.
+
+## STEP40 Real Domain Onboarding
+
+STEP40 adds configuration-only domain onboarding readiness without live DNS lookups, registrar integrations, or DNS automation.
+
+`domains.onboarding_state` stores the lifecycle state: `draft`, `validating`, `ready`, `active`, or `suspended`. `domain_onboarding_audits` records domain lifecycle changes with safe metadata and no credentials or DNS record values.
+
+`DomainDnsReadinessService` resolves manual MX, SPF, DKIM, DMARC, and provider mapping readiness flags. `DomainSafetyCheckService` reviews DNS readiness, domain pool compatibility, provider compatibility, feature gates, and organization compatibility. `DomainOnboardingService` owns lifecycle changes, audit creation, activation review, recommendations, and privacy-safe operations events.
+
+The domain pool assigns only domains with both general status `active` and onboarding state `active`. `domain:onboarding-status` prints aggregate blockers, warnings, recommendations, and lifecycle counts without exposing domain names or DNS values.

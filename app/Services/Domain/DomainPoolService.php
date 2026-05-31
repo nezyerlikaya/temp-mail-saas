@@ -3,6 +3,7 @@
 namespace App\Services\Domain;
 
 use App\Enums\DomainAssignmentStrategy;
+use App\Enums\DomainOnboardingState;
 use App\Enums\DomainStatus;
 use App\Models\Domain;
 use App\Models\DomainAssignment;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 final class DomainPoolService extends Service
@@ -39,6 +41,11 @@ final class DomainPoolService extends Service
 
         return Domain::query()
             ->where('status', DomainStatus::Active)
+            ->when(
+                Schema::hasColumn('domains', 'onboarding_state')
+                    && (bool) config('domains.onboarding.require_active_for_assignment', true),
+                fn (Builder $query) => $query->where('onboarding_state', DomainOnboardingState::Active),
+            )
             ->whereIn('tier', $tiers)
             ->where('health_score', '>=', max(1, (int) config('performance.thresholds.domain_pool_min_health', 1)))
             ->tap(fn (Builder $query) => $this->applyOrganizationCompatibility($query, $organization))
@@ -74,7 +81,7 @@ final class DomainPoolService extends Service
             ? Domain::query()->where('domain', $domainName)->first()
             : null;
 
-        if ($domain instanceof Domain && config('domains-pool.assignment.record_history', true)) {
+        if ($domain instanceof Domain && $this->assignmentAllowed($domain) && config('domains-pool.assignment.record_history', true)) {
             $this->recordAssignment($domain, $mailboxAddress, $user, $organization);
         }
 
@@ -93,7 +100,7 @@ final class DomainPoolService extends Service
 
         $domain = Domain::query()->where('domain', $domainName)->first();
 
-        if ($domain instanceof Domain) {
+        if ($domain instanceof Domain && $this->assignmentAllowed($domain)) {
             $this->recordAssignment($domain, $mailboxAddress, $user, $organization);
         }
     }
@@ -112,6 +119,12 @@ final class DomainPoolService extends Service
         ?Organization $organization = null,
         array $metadata = [],
     ): DomainAssignment {
+        if (! $this->assignmentAllowed($domain)) {
+            throw ValidationException::withMessages([
+                'domain' => 'Domain is not active for mailbox assignment.',
+            ]);
+        }
+
         return DomainAssignment::query()->create([
             'domain_id' => $domain->id,
             'mailbox_address' => $mailboxAddress,
@@ -166,6 +179,17 @@ final class DomainPoolService extends Service
         return $domains
             ->sortByDesc(fn (Domain $domain): int => max(1, $domain->health_score) + max(1, 200 - $domain->priority))
             ->first();
+    }
+
+    private function assignmentAllowed(Domain $domain): bool
+    {
+        if (! $domain->isActive()) {
+            return false;
+        }
+
+        return ! Schema::hasColumn('domains', 'onboarding_state')
+            || ! (bool) config('domains.onboarding.require_active_for_assignment', true)
+            || $domain->isOnboardingActive();
     }
 
     private function applyOrganizationCompatibility(Builder $query, ?Organization $organization): void

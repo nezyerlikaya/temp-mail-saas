@@ -14,7 +14,6 @@ use App\Services\Service;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Str;
 use Throwable;
 
 final class ProviderSandboxValidationService extends Service
@@ -93,6 +92,7 @@ final class ProviderSandboxValidationService extends Service
             }
 
             Queue::fake();
+            $payload['intake_key'] ??= 'sandbox:'.hash('sha256', $provider.'|'.(string) $normalized['provider_id']);
             $before = InboundMailIntake::query()->count();
             $intake = $this->intakes->create($payload, $headers, '127.0.0.1', $provider);
             $duplicate = InboundMailIntake::query()->count() === $before;

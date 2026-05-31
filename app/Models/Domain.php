@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\DomainAssignmentStrategy;
+use App\Enums\DomainOnboardingState;
 use App\Enums\DomainStatus;
 use App\Enums\DomainTier;
 use App\Enums\DomainType;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'uuid',
     'domain',
     'status',
+    'onboarding_state',
     'type',
     'tier',
     'priority',
@@ -24,9 +26,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Domain extends Model
 {
+    protected static function booted(): void
+    {
+        static::creating(function (Domain $domain): void {
+            if ($domain->onboarding_state === null && $domain->status === DomainStatus::Active) {
+                $domain->onboarding_state = DomainOnboardingState::Active;
+            }
+        });
+    }
+
     public function assignments(): HasMany
     {
         return $this->hasMany(DomainAssignment::class);
+    }
+
+    public function onboardingAudits(): HasMany
+    {
+        return $this->hasMany(DomainOnboardingAudit::class);
     }
 
     public function isActive(): bool
@@ -39,10 +55,16 @@ class Domain extends Model
         return $this->health_score >= (int) config('domains-pool.health_thresholds.healthy', 80);
     }
 
+    public function isOnboardingActive(): bool
+    {
+        return $this->onboarding_state === DomainOnboardingState::Active;
+    }
+
     protected function casts(): array
     {
         return [
             'status' => DomainStatus::class,
+            'onboarding_state' => DomainOnboardingState::class,
             'type' => DomainType::class,
             'tier' => DomainTier::class,
             'assignment_strategy' => DomainAssignmentStrategy::class,

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\AccountTier;
 use App\Enums\DomainAssignmentStrategy;
+use App\Enums\DomainOnboardingState;
 use App\Enums\DomainStatus;
 use App\Enums\DomainTier;
 use App\Enums\DomainType;
@@ -182,6 +183,7 @@ class DomainPoolFoundationTest extends TestCase
             'uuid' => (string) Str::uuid(),
             'domain' => $domain,
             'status' => $status,
+            'onboarding_state' => DomainOnboardingState::Active,
             'type' => $tier === DomainTier::Premium ? DomainType::Premium : DomainType::Public,
             'tier' => $tier,
             'priority' => $priority,
