@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BillingWebhookController;
 use App\Http\Controllers\Admin\OperationsCenterController;
+use App\Http\Controllers\Admin\LocalizationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\PublicInboxController;
@@ -99,6 +100,48 @@ Route::prefix('admin')
         Route::get('/audit', [OperationsCenterController::class, 'audit'])
             ->middleware('staff.permission:audit.view')
             ->name('audit');
+        Route::get('/localization', [LocalizationController::class, 'index'])
+            ->middleware('staff.permission:localization.view')
+            ->name('localization');
+        Route::get('/localization/languages', [LocalizationController::class, 'languages'])
+            ->middleware('staff.permission:localization.view')
+            ->name('localization.languages');
+        Route::post('/localization/languages', [LocalizationController::class, 'storeLanguage'])
+            ->middleware('staff.permission:localization.manage')
+            ->name('localization.languages.store');
+        Route::get('/localization/languages/{language}/edit', [LocalizationController::class, 'editLanguage'])
+            ->middleware('staff.permission:localization.manage')
+            ->name('localization.languages.edit');
+        Route::put('/localization/languages/{language}', [LocalizationController::class, 'updateLanguage'])
+            ->middleware('staff.permission:localization.manage')
+            ->name('localization.languages.update');
+        Route::patch('/localization/languages/{language}/activate', [LocalizationController::class, 'activate'])
+            ->middleware('staff.permission:localization.manage')
+            ->name('localization.languages.activate');
+        Route::patch('/localization/languages/{language}/deactivate', [LocalizationController::class, 'deactivate'])
+            ->middleware('staff.permission:localization.manage')
+            ->name('localization.languages.deactivate');
+        Route::patch('/localization/languages/{language}/default', [LocalizationController::class, 'makeDefault'])
+            ->middleware('staff.permission:localization.manage')
+            ->name('localization.languages.default');
+        Route::delete('/localization/languages/{language}', [LocalizationController::class, 'destroyLanguage'])
+            ->middleware('staff.permission:localization.manage')
+            ->name('localization.languages.destroy');
+        Route::get('/localization/translations', [LocalizationController::class, 'translations'])
+            ->middleware('staff.permission:localization.view')
+            ->name('localization.translations');
+        Route::put('/localization/translations', [LocalizationController::class, 'updateTranslations'])
+            ->middleware('staff.permission:localization.manage')
+            ->name('localization.translations.update');
+        Route::get('/localization/import', [LocalizationController::class, 'importForm'])
+            ->middleware('staff.permission:localization.import')
+            ->name('localization.import');
+        Route::post('/localization/import', [LocalizationController::class, 'import'])
+            ->middleware('staff.permission:localization.import')
+            ->name('localization.import.store');
+        Route::get('/localization/export', [LocalizationController::class, 'export'])
+            ->middleware('staff.permission:localization.export')
+            ->name('localization.export');
     });
 
 Route::post('/locale', function (Request $request, LocaleService $locales) {

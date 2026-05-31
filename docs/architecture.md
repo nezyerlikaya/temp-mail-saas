@@ -1293,6 +1293,81 @@ Canceled or inactive subscription states update the subscription lifecycle safel
 
 STEP22 prepares persistence, provider abstraction, webhook idempotency, and plan sync. A future checkout layer can add hosted checkout sessions, customer portals, subscription UI, tax handling, refunds, coupons, invoice presentation, and provider SDKs on top of this foundation without replacing the storage or webhook boundary.
 
+## STEP24 Globalization And Localization Center
+
+STEP24 turns the localization foundation into a permission-protected admin center while preserving the existing runtime locale switch behavior.
+
+## Localization Architecture
+
+Languages remain the source of truth for locale code, display name, native name, active state, default state, sort order, and text direction. Translations remain grouped by language, namespace, and key.
+
+The admin center is implemented under the existing admin layout and uses the shared admin card, table, and empty-state components. Routes are protected through staff RBAC permissions:
+
+- `localization.view`
+- `localization.manage`
+- `localization.import`
+- `localization.export`
+
+All write operations are enforced server-side. UI controls are convenience only and are not treated as security.
+
+## Language Lifecycle
+
+Language management supports create, edit, activate, deactivate, set default, and delete operations with conservative safeguards:
+
+- Exactly one language can be default.
+- Setting a new default automatically clears previous defaults.
+- Default languages cannot be deleted.
+- Default languages cannot be disabled.
+- The last active language cannot be disabled.
+
+Only active languages are available to the runtime locale switcher. Invalid or inactive locale requests fall back safely to the configured default and fallback locale chain.
+
+## Translation Management
+
+Translations can be searched, filtered by language, filtered by namespace, paginated, and bulk updated from the admin center. Updates set the translation as custom and write a privacy-safe localization audit entry.
+
+Translation values are stored as text metadata only. STEP24 does not introduce machine translation, marketplace workflows, crowd translation, or frontend editor widgets.
+
+## Import And Export Strategy
+
+JSON export produces grouped translation payloads for a selected language. JSON import accepts grouped payloads in this shape:
+
+```json
+{
+  "namespace": {
+    "key": "value"
+  }
+}
+```
+
+Imports validate the target language, parse JSON without code execution, update duplicate keys safely through `updateOrCreate`, and do not write arbitrary files.
+
+## Progress Tracking
+
+`LocalizationProgressService` compares each language against the default language. It calculates completion percentage, completed count, missing keys, and untranslated values.
+
+For non-default languages, values identical to the default language are treated as untranslated so future translation workflows can prioritize real localization work.
+
+## Audit Logging
+
+`localization_audits` records translation-focused changes only:
+
+- Language context
+- Staff user context
+- Action
+- Translation key when applicable
+- Old value
+- New value
+- Created timestamp
+
+The audit trail avoids sensitive operational metadata and is designed for future admin visibility, compliance summaries, or rollback review without storing unrelated request data.
+
+## RTL Strategy
+
+Runtime layout direction is resolved through `LocaleService::directionFor()` and applied to the shared app layout through the root `dir` attribute. Admin pages continue to reuse the existing layout stack and do not duplicate templates for RTL.
+
+Language records expose direction awareness, allowing future frontend components, content previews, email templates, and marketing pages to adapt to RTL without changing routing or replacing layouts.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:

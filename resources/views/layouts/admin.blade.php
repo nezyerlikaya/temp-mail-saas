@@ -19,6 +19,7 @@
                             'admin.abuse' => 'Abuse',
                             'admin.billing' => 'Billing',
                             'admin.audit' => 'Audit',
+                            'admin.localization' => 'Localization',
                         ] as $route => $label)
                             <a href="{{ route($route) }}" class="rounded-xl border border-white/10 px-3 py-2 text-slate-200 hover:border-cyan-300/60 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-300">
                                 {{ $label }}

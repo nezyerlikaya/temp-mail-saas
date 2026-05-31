@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 @php($seoMeta = app(\App\Services\Seo\SeoService::class)->meta(['title' => $title ?? null]))
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app(\App\Services\System\LocaleService::class)->directionFor() }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">

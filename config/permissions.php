@@ -54,6 +54,12 @@ return [
             'settings.view' => 'View settings',
             'settings.manage' => 'Manage settings',
         ],
+        'localization' => [
+            'localization.view' => 'View localization center',
+            'localization.manage' => 'Manage languages and translations',
+            'localization.import' => 'Import translations',
+            'localization.export' => 'Export translations',
+        ],
     ],
 
     'roles' => [
@@ -85,6 +91,10 @@ return [
                 'billing.view',
                 'audit.view',
                 'settings.view',
+                'localization.view',
+                'localization.manage',
+                'localization.import',
+                'localization.export',
             ],
         ],
         'support' => [
@@ -100,6 +110,9 @@ return [
                 'billing.view',
                 'audit.view',
                 'settings.view',
+                'localization.view',
+                'localization.import',
+                'localization.export',
             ],
         ],
         'moderator' => [

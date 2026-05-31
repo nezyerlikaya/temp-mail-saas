@@ -110,6 +110,19 @@ final class LocaleService extends Service
         return $locale;
     }
 
+    public function directionFor(?string $locale = null): string
+    {
+        $locale ??= app()->getLocale();
+
+        try {
+            $language = Language::query()->where('code', $locale)->first();
+
+            return $language?->direction->value ?? 'ltr';
+        } catch (Throwable) {
+            return 'ltr';
+        }
+    }
+
     public function storeLocaleInSession(Request $request, string $locale): bool
     {
         if (! $this->isValidLocale($locale)) {
