@@ -4,29 +4,33 @@ namespace App\Services\Mail;
 
 use App\Contracts\Mail\InboundProviderContract;
 use App\Enums\InboundIntakeStatus;
-use App\Enums\InboundProvider;
 use App\Jobs\ProcessInboundMailIntake;
 use App\Models\InboundMailIntake;
-use App\Services\Mail\Providers\LocalInboundProvider;
 use App\Services\Service;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 
 final class InboundMailIntakeService extends Service
 {
+    public function __construct(
+        private readonly ProviderRegistryService $providers,
+        private readonly InboundProviderMetricsService $metrics,
+    ) {}
+
     public function create(array $payload, array $headers = [], ?string $sourceIp = null, ?string $provider = null): InboundMailIntake
     {
         $providerContract = $this->provider($provider);
         $providerName = $providerContract->provider();
         $providerMessageId = $payload['provider_message_id'] ?? $payload['provider_id'] ?? null;
-        $intakeKey = $payload['intake_key'] ?? null;
+        $intakeKey = $payload['intake_key'] ?? $this->payloadIntakeKey($providerName, $payload);
 
         if ($duplicate = $this->duplicate($providerName, $providerMessageId, $intakeKey)) {
             return $duplicate;
         }
 
         return DB::transaction(function () use ($payload, $headers, $sourceIp, $providerContract, $providerName, $providerMessageId, $intakeKey): InboundMailIntake {
+            $this->metrics->intake($providerName);
+
             $intake = InboundMailIntake::query()->create([
                 'uuid' => (string) Str::uuid(),
                 'provider' => $providerName,
@@ -50,6 +54,8 @@ final class InboundMailIntakeService extends Service
             ])->save();
 
             if (! $signatureValid) {
+                $this->metrics->rejection($providerName);
+
                 return $intake->refresh();
             }
 
@@ -65,14 +71,7 @@ final class InboundMailIntakeService extends Service
 
     public function provider(?string $provider = null): InboundProviderContract
     {
-        $provider = $provider ?? (string) config('inbound.default_provider', InboundProvider::Local->value);
-
-        return match ($provider) {
-            InboundProvider::Local->value => app(LocalInboundProvider::class),
-            default => throw ValidationException::withMessages([
-                'provider' => 'Inbound provider is not configured.',
-            ]),
-        };
+        return $this->providers->resolve($provider ?? (string) config('inbound.default_provider', 'local'));
     }
 
     public function hashSourceIp(?string $sourceIp): ?string
@@ -105,5 +104,25 @@ final class InboundMailIntakeService extends Service
         }
 
         return null;
+    }
+
+    private function payloadIntakeKey(string $provider, array $payload): string
+    {
+        $normalized = $this->sortPayload($payload);
+
+        return 'payload:'.hash('sha256', $provider.'|'.json_encode($normalized, JSON_THROW_ON_ERROR));
+    }
+
+    private function sortPayload(array $payload): array
+    {
+        ksort($payload);
+
+        foreach ($payload as $key => $value) {
+            if (is_array($value)) {
+                $payload[$key] = $this->sortPayload($value);
+            }
+        }
+
+        return $payload;
     }
 }

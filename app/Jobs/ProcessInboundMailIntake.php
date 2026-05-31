@@ -6,6 +6,7 @@ use App\Enums\InboundIntakeStatus;
 use App\Models\InboundMailIntake;
 use App\Services\Mail\EmailMessageStorageService;
 use App\Services\Mail\InboundMailIntakeService;
+use App\Services\Mail\InboundProviderMetricsService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
@@ -21,10 +22,12 @@ class ProcessInboundMailIntake implements ShouldQueue
     public function handle(
         InboundMailIntakeService $intakes,
         EmailMessageStorageService $messages,
+        ?InboundProviderMetricsService $metrics = null,
     ): void {
+        $metrics ??= app(InboundProviderMetricsService::class);
         $intake = InboundMailIntake::query()->find($this->intakeId);
 
-        if ($intake === null || $intake->isProcessed() || $intake->status === InboundIntakeStatus::Rejected) {
+        if ($intake === null || $intake->status !== InboundIntakeStatus::Queued) {
             return;
         }
 
@@ -42,6 +45,7 @@ class ProcessInboundMailIntake implements ShouldQueue
             $intake->markProcessed();
         } catch (Throwable $exception) {
             $intake->markFailed($exception->getMessage());
+            $metrics->failure($intake->provider->value);
         }
     }
 }

@@ -11,6 +11,7 @@ use App\Enums\RetentionTier;
 use App\Models\EmailMessage;
 use App\Services\Service;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 final class EmailMessageStorageService extends Service
@@ -21,41 +22,43 @@ final class EmailMessageStorageService extends Service
 
     public function create(array $data): EmailMessage
     {
-        $tier = $this->retentionTier($data['retention_tier'] ?? null);
+        return DB::transaction(function () use ($data): EmailMessage {
+            $tier = $this->retentionTier($data['retention_tier'] ?? null);
 
-        $message = EmailMessage::query()->create([
-            'uuid' => (string) Str::uuid(),
-            'mailbox_address' => $data['mailbox_address'] ?? null,
-            'recipient_local_part' => $data['recipient_local_part'] ?? $this->localPart($data['mailbox_address'] ?? null),
-            'recipient_domain' => $data['recipient_domain'] ?? $this->domain($data['mailbox_address'] ?? null),
-            'from_email' => $data['from_email'] ?? null,
-            'from_name' => $data['from_name'] ?? null,
-            'subject' => $data['subject'] ?? null,
-            'message_id_header' => $data['message_id_header'] ?? null,
-            'in_reply_to' => $data['in_reply_to'] ?? null,
-            'references_header' => $data['references_header'] ?? null,
-            'text_body' => $data['text_body'] ?? null,
-            'html_body' => $data['html_body'] ?? null,
-            'sanitized_html_body' => $data['sanitized_html_body'] ?? null,
-            'status' => $this->messageStatus($data['status'] ?? null)->value,
-            'parse_status' => $this->parseStatus($data['parse_status'] ?? null)->value,
-            'intake_source' => $data['intake_source'] ?? config('inbound.storage.default_source', 'manual'),
-            'provider_id' => $data['provider_id'] ?? null,
-            'intake_key' => $data['intake_key'] ?? null,
-            'is_quarantined' => (bool) ($data['is_quarantined'] ?? false),
-            'quarantine_reason' => $data['quarantine_reason'] ?? null,
-            'abuse_score' => (int) ($data['abuse_score'] ?? 0),
-            'retention_tier' => $tier->value,
-            'expires_at' => $data['expires_at'] ?? $this->retention->expirationFor($tier),
-            'received_at' => $data['received_at'] ?? now(),
-            'processed_at' => $data['processed_at'] ?? null,
-            'failed_at' => $data['failed_at'] ?? null,
-        ]);
+            $message = EmailMessage::query()->create([
+                'uuid' => (string) Str::uuid(),
+                'mailbox_address' => $data['mailbox_address'] ?? null,
+                'recipient_local_part' => $data['recipient_local_part'] ?? $this->localPart($data['mailbox_address'] ?? null),
+                'recipient_domain' => $data['recipient_domain'] ?? $this->domain($data['mailbox_address'] ?? null),
+                'from_email' => $data['from_email'] ?? null,
+                'from_name' => $data['from_name'] ?? null,
+                'subject' => $data['subject'] ?? null,
+                'message_id_header' => $data['message_id_header'] ?? null,
+                'in_reply_to' => $data['in_reply_to'] ?? null,
+                'references_header' => $data['references_header'] ?? null,
+                'text_body' => $data['text_body'] ?? null,
+                'html_body' => $data['html_body'] ?? null,
+                'sanitized_html_body' => $data['sanitized_html_body'] ?? null,
+                'status' => $this->messageStatus($data['status'] ?? null)->value,
+                'parse_status' => $this->parseStatus($data['parse_status'] ?? null)->value,
+                'intake_source' => $data['intake_source'] ?? config('inbound.storage.default_source', 'manual'),
+                'provider_id' => $data['provider_id'] ?? null,
+                'intake_key' => $data['intake_key'] ?? null,
+                'is_quarantined' => (bool) ($data['is_quarantined'] ?? false),
+                'quarantine_reason' => $data['quarantine_reason'] ?? null,
+                'abuse_score' => (int) ($data['abuse_score'] ?? 0),
+                'retention_tier' => $tier->value,
+                'expires_at' => $data['expires_at'] ?? $this->retention->expirationFor($tier),
+                'received_at' => $data['received_at'] ?? now(),
+                'processed_at' => $data['processed_at'] ?? null,
+                'failed_at' => $data['failed_at'] ?? null,
+            ]);
 
-        $this->attachRecipients($message, $data['recipients'] ?? []);
-        $this->attachAttachmentMetadata($message, $data['attachments'] ?? []);
+            $this->attachRecipients($message, $data['recipients'] ?? []);
+            $this->attachAttachmentMetadata($message, $data['attachments'] ?? []);
 
-        return $message->refresh()->load(['recipients', 'attachments']);
+            return $message->refresh()->load(['recipients', 'attachments']);
+        });
     }
 
     public function attachRecipients(EmailMessage $message, array $recipients): void
