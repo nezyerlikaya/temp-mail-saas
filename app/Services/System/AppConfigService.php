@@ -43,7 +43,7 @@ final class AppConfigService extends Service
 
     public function inboundProvider(): string
     {
-        return $this->stringConfig('inbound.provider', (string) config('inbound.driver', 'null'));
+        return $this->stringConfig('inbound.provider', 'null');
     }
 
     public function defaultSeoTitle(): string

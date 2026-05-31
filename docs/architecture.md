@@ -399,7 +399,45 @@ Attachment scan status is represented by `EmailAttachmentScanStatus`: pending, c
 
 ## Future Compatibility
 
-STEP10 can add queue and inbound intake workers that call `EmailMessageStorageService` with normalized arrays. STEP12 can build public inbox behavior on top of stored messages, recipients, retention state, and attachment metadata without changing this schema. API endpoints, realtime events, mailbox generation, and admin message screens remain future modules.
+STEP10 builds on this storage layer with queue-first inbound intake workers that call `EmailMessageStorageService` with normalized arrays. STEP12 can build public inbox behavior on top of stored messages, recipients, retention state, and attachment metadata without changing this schema. API endpoints, realtime events, mailbox generation, and admin message screens remain future modules.
+
+## STEP10 Inbound Mail Processing Queue
+
+STEP10 adds a queue-first inbound intake foundation. It does not add production webhook endpoints, Mailgun/Postmark/SES integrations, SMTP handling, IMAP polling, raw MIME parsing, attachment file storage, public inbox UI, admin intake review UI, or API endpoints.
+
+Inbound attempts are stored in `inbound_mail_intakes` with provider metadata, signature status, private headers and payload JSON, normalized payload JSON, failure messages, and processing timestamps. Payloads are private operational records and are never exposed publicly.
+
+## Queue-First Strategy
+
+Controllers and future webhook handlers must not parse or store messages synchronously. Their future responsibility is limited to receiving a request, creating an intake through `InboundMailIntakeService`, verifying the provider signature, and dispatching `ProcessInboundMailIntake`.
+
+`ProcessInboundMailIntake` loads the intake, marks it processing, asks the configured provider to normalize the payload, stores the message through `EmailMessageStorageService`, and marks the intake processed. The sync queue still works for shared-hosting and testing, while database/Redis queues can be used later on VPS deployments.
+
+## Provider Contracts
+
+Inbound providers implement `InboundProviderContract`:
+
+- `provider()`
+- `verifySignature()`
+- `normalizePayload()`
+
+Signature verification can also be represented by `InboundSignatureVerifierContract`. Real provider secrets and algorithms are intentionally deferred.
+
+The local provider exists for testing and local simulation only. It can allow unsigned payloads in local/testing or require a configured local token. It maps safe arrays into the STEP09 message storage shape without parsing MIME.
+
+## Failure Handling
+
+Failed processing marks the intake failed, records a short safe error message, and avoids stack traces in the database. Original payloads remain private for future admin review.
+
+Invalid signatures are rejected before queue processing. Rejected intakes do not create email messages.
+
+## Duplicate Prevention
+
+`InboundMailIntakeService` performs basic duplicate checks by provider plus provider message ID or provider plus intake key. Existing duplicate intakes are returned instead of creating a second intake or duplicate message.
+
+## Future Compatibility
+
+STEP11 can add real provider adapters behind the existing contracts. STEP12 can build public inbox behavior on top of normalized messages created through the same storage service. Future provider webhook routes should be disabled by default until explicitly configured and must keep queue-first behavior.
 
 ## Extension Strategy
 
