@@ -60,6 +60,6 @@ final class InstallerController extends Controller
 
         $lock->create();
 
-        return redirect('/admin/login');
+        return redirect()->route('admin.login');
     }
 }

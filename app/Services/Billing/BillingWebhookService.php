@@ -30,7 +30,9 @@ final class BillingWebhookService extends Service
         $event = $this->createEvent($provider, $eventId, $eventType, $payload, $signatureValid);
 
         if (! $signatureValid) {
-            $event->forceFill(['status' => BillingWebhookStatus::Rejected->value])->save();
+            if (! $event->isProcessed()) {
+                $event->forceFill(['status' => BillingWebhookStatus::Rejected->value])->save();
+            }
 
             return ['ok' => false, 'status' => 'rejected'];
         }

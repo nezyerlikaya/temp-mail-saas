@@ -7,6 +7,7 @@ use App\Services\Api\ApiRateLimitService;
 use App\Services\Api\ApiUsageLoggerService;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Symfony\Component\HttpFoundation\Response;
 
 final class AuthenticateApiKey
@@ -30,6 +31,16 @@ final class AuthenticateApiKey
 
             return response()->json(['message' => 'API access is not enabled for this account.'], 403);
         }
+
+        $limiterKey = 'api-key:'.$apiKey->uuid.':'.sha1('/'.ltrim($request->path(), '/'));
+
+        if (RateLimiter::tooManyAttempts($limiterKey, $limits['per_minute'])) {
+            app(ApiUsageLoggerService::class)->log($apiKey, $request, 429);
+
+            return response()->json(['message' => 'Too many API requests.'], 429);
+        }
+
+        RateLimiter::hit($limiterKey, 60);
 
         $request->attributes->set('api_key', $apiKey);
         $request->attributes->set('api_user', $user);

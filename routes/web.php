@@ -72,6 +72,9 @@ Route::get('/dashboard', DashboardController::class)
     ->middleware('auth')
     ->name('dashboard');
 
+Route::get('/admin/login', fn () => redirect()->route('login'))
+    ->name('admin.login');
+
 Route::prefix('admin')
     ->name('admin.')
     ->middleware(['staff.active'])
