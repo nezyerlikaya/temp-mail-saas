@@ -2,13 +2,35 @@
 
 namespace App\Services\Operations;
 
+use App\Enums\OperationCategory;
 use App\Enums\SystemHealthStatus;
+use App\Models\Domain;
 use App\Models\DomainHealthCheck;
 use App\Services\Service;
 use Illuminate\Support\Str;
 
 final class DomainHealthService extends Service
 {
+    public function calculateHealthScore(string $domain): int
+    {
+        return filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false ? 100 : 25;
+    }
+
+    public function markHealthy(Domain $domain, ?string $message = null): Domain
+    {
+        return $this->mark($domain, 100, $message ?? 'Domain marked healthy.');
+    }
+
+    public function markWarning(Domain $domain, ?string $message = null): Domain
+    {
+        return $this->mark($domain, (int) config('domains-pool.health_thresholds.warning', 50), $message ?? 'Domain marked warning.');
+    }
+
+    public function markCritical(Domain $domain, ?string $message = null): Domain
+    {
+        return $this->mark($domain, max(0, (int) config('domains-pool.health_thresholds.warning', 50) - 1), $message ?? 'Domain marked critical.');
+    }
+
     public function evaluate(bool $store = true): array
     {
         $domains = $this->domains();
@@ -21,8 +43,8 @@ final class DomainHealthService extends Service
 
     private function evaluateDomain(string $domain, bool $store): array
     {
-        $valid = filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false;
-        $score = $valid ? 100 : 25;
+        $score = $this->calculateHealthScore($domain);
+        $valid = $score >= (int) config('operations.thresholds.domain_warning_score', 70);
         $status = match (true) {
             $score < (int) config('operations.thresholds.domain_critical_score', 40) => SystemHealthStatus::Critical,
             $score < (int) config('operations.thresholds.domain_warning_score', 70) => SystemHealthStatus::Warning,
@@ -68,5 +90,27 @@ final class DomainHealthService extends Service
             fn (mixed $domain): string => Str::lower(trim((string) $domain)),
             $domains,
         ))));
+    }
+
+    private function mark(Domain $domain, int $score, string $message): Domain
+    {
+        $domain->forceFill([
+            'health_score' => max(0, min(100, $score)),
+            'last_checked_at' => now(),
+        ])->save();
+
+        DomainHealthCheck::query()->create([
+            'domain' => $domain->domain,
+            'status' => match (true) {
+                $domain->health_score < (int) config('domains-pool.health_thresholds.warning', 50) => SystemHealthStatus::Critical,
+                $domain->health_score < (int) config('domains-pool.health_thresholds.healthy', 80) => SystemHealthStatus::Warning,
+                default => SystemHealthStatus::Healthy,
+            },
+            'score' => $domain->health_score,
+            'message' => $message,
+            'checked_at' => now(),
+        ]);
+
+        return $domain->refresh();
     }
 }

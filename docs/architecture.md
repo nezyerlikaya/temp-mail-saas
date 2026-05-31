@@ -1081,6 +1081,93 @@ Enterprise custom domain placeholders live in configuration only. STEP20 does no
 
 STEP20 establishes organization IDs as a future audit boundary. Existing operations, abuse, and API logs are not broadly rewritten in this step, but future loggers can safely accept organization context from `TenantContextService` and store additive `organization_id` references where appropriate.
 
+## STEP21 Advanced Domain Pool Management
+
+STEP21 adds a domain inventory and assignment foundation without implementing DNS validation, MX validation, SPF validation, DKIM validation, blacklist lookups, SSL automation, custom domains, provider integrations, or an admin domain UI.
+
+The public inbox remains backward compatible: when no active domain inventory is available, mailbox generation falls back to the existing config-backed public mailbox domain list.
+
+## Domain Pool Architecture
+
+`domains` stores the operational domain inventory:
+
+- UUID
+- Unique domain
+- Status
+- Type
+- Tier
+- Priority
+- Health score
+- Assignment strategy
+- Safe metadata
+- Last checked timestamp
+
+Stable enums define:
+
+- `DomainStatus`: active, inactive, maintenance, suspended
+- `DomainType`: public, premium, enterprise
+- `DomainTier`: free, member, premium, enterprise
+- `DomainAssignmentStrategy`: random, weighted, priority, health based
+
+`DomainSeeder` creates demo `.test` domains for development only and is safe to rerun.
+
+## Assignment History
+
+`domain_assignments` records audit-focused assignment history with optional mailbox address, user, organization, safe metadata, and assignment timestamp. It does not store email content, message bodies, provider payloads, secrets, DNS material, or credentials.
+
+`DomainPoolService::recordAssignment()` sanitizes metadata before writing assignment records.
+
+## Assignment Strategies
+
+`DomainPoolService` resolves eligible active domains and applies a configurable strategy:
+
+- Random: choose any eligible domain.
+- Priority: prefer the lowest priority value.
+- Weighted: prefer stronger combined priority and health.
+- Health based: prefer high-health domains while respecting priority.
+
+The default strategy is `health_based`. Selection is local and database-backed; no external provider call is made.
+
+## Health Scoring
+
+`DomainHealthService` now includes domain inventory helpers:
+
+- `calculateHealthScore()`
+- `markHealthy()`
+- `markWarning()`
+- `markCritical()`
+
+These helpers update local health score and create `domain_health_checks` records. STEP21 does not perform live DNS, MX, SPF, DKIM, reputation, or blacklist checks.
+
+## Plan-Aware Domain Selection
+
+Domain eligibility is plan-aware through `FeatureGateService` and `config/domains-pool.php`.
+
+Default tier mapping:
+
+- Free: free domains
+- Member: free and member domains
+- Premium: free, member, and premium domains
+- Enterprise: free, member, premium, and enterprise domains
+
+Feature gates may also provide explicit `domain_tiers` per plan. Global abuse and public inbox behavior remain unchanged.
+
+## Organization Compatibility
+
+`DomainPoolService` accepts an optional organization context. Organization plans can influence domain tier eligibility through the existing organization-aware feature gate resolution from STEP20.
+
+This prepares future enterprise custom domains and organization-owned routing without creating domain ownership tables, DNS validation, SSL automation, or tenant-specific mail routing yet.
+
+## Mailbox Generation Integration
+
+`PublicMailboxService` now asks `DomainPoolService` for domain selection. Generated mailbox addresses record assignment history when the selected domain exists in the inventory.
+
+If the domain inventory is empty or unavailable during installer/recovery scenarios, mailbox generation falls back to config domains to preserve shared-hosting compatibility and existing behavior.
+
+## Future DNS And Provider Compatibility
+
+Future domain pool management can add DNS validation, MX checks, SPF/DKIM checks, blacklist/reputation adapters, provider-specific health signals, custom domain ownership, SSL automation, and admin UI on top of the inventory and assignment foundations without changing public inbox contracts.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:
