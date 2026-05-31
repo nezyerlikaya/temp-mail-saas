@@ -1832,3 +1832,13 @@ STEP40 adds configuration-only domain onboarding readiness without live DNS look
 `DomainDnsReadinessService` resolves manual MX, SPF, DKIM, DMARC, and provider mapping readiness flags. `DomainSafetyCheckService` reviews DNS readiness, domain pool compatibility, provider compatibility, feature gates, and organization compatibility. `DomainOnboardingService` owns lifecycle changes, audit creation, activation review, recommendations, and privacy-safe operations events.
 
 The domain pool assigns only domains with both general status `active` and onboarding state `active`. `domain:onboarding-status` prints aggregate blockers, warnings, recommendations, and lifecycle counts without exposing domain names or DNS values.
+
+## STEP41 First Real Mail Reception Validation
+
+STEP41 adds a read-only first real mail validation layer without external HTTP calls or credential setup.
+
+`FirstRealMailValidationService` checks provider activation, domain onboarding, webhook route readiness, signature configuration, duplicate/replay protection, queue capacity, mailbox generation, inbox visibility, and cleanup compatibility. It records safe operations events for validation start, ready, and blocked states.
+
+`MailReceptionTraceService` traces the lifecycle from provider intake to inbound intake, queued job handoff, email message storage, and public inbox visibility. It supports lookup by intake UUID, provider message id, email message UUID, and mailbox address. Trace output excludes raw provider payloads, raw HTML, secret headers, signature secrets, and storage paths.
+
+`mail:first-real-check` prints safe readiness and optional trace diagnostics for the first real message validation workflow.

@@ -2,6 +2,7 @@
 
 use App\Console\Commands\CleanupExpiredMailCommand;
 use App\Console\Commands\DomainOnboardingStatusCommand;
+use App\Console\Commands\MailFirstRealCheckCommand;
 use App\Console\Commands\MailProviderSandboxCheckCommand;
 use App\Console\Commands\MonitoringHealthReviewCommand;
 use App\Console\Commands\MonitoringIncidentReviewCommand;
@@ -36,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withCommands([
         CleanupExpiredMailCommand::class,
         DomainOnboardingStatusCommand::class,
+        MailFirstRealCheckCommand::class,
         MailProviderSandboxCheckCommand::class,
         MonitoringHealthReviewCommand::class,
         MonitoringIncidentReviewCommand::class,
