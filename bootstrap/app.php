@@ -1,6 +1,8 @@
 <?php
 
 use App\Console\Commands\CleanupExpiredMailCommand;
+use App\Console\Commands\OperationsCollectMetricsCommand;
+use App\Console\Commands\OperationsHealthSummaryCommand;
 use App\Console\Commands\SystemHealthCheckCommand;
 use App\Console\Commands\SystemReadinessCheckCommand;
 use App\Http\Middleware\AuthenticateApiKey;
@@ -23,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands([
         CleanupExpiredMailCommand::class,
+        OperationsCollectMetricsCommand::class,
+        OperationsHealthSummaryCommand::class,
         SystemHealthCheckCommand::class,
         SystemReadinessCheckCommand::class,
     ])

@@ -929,6 +929,80 @@ The production foundation gives deployers a local, provider-free way to answer t
 
 Future observability and operations center work can build dashboards on top of the health table, readiness service, error tracking abstraction, and backup readiness checks without replacing these foundations.
 
+## STEP19 Observability And Operations Center Foundation
+
+STEP19 adds operations and observability infrastructure without introducing an admin dashboard, Horizon, Pulse, Grafana, Prometheus, external monitoring, alert emails, Slack, or Discord integrations.
+
+The foundation remains shared-hosting compatible and privacy-first. Operational records never store secrets, request payloads, email bodies, raw job payloads, raw exceptions, passwords, tokens, or API keys.
+
+## Operations Event Model
+
+`operations_events` stores dashboard-ready operational events with:
+
+- UUID
+- Category
+- Event type
+- Severity
+- Status
+- Optional source
+- Safe message
+- Sanitized metadata
+- Occurrence timestamp
+
+Enums define stable values:
+
+- `OperationCategory`: system, queue, domain, abuse, api, mail, scheduler
+- `OperationSeverity`: info, warning, error, critical
+- `OperationStatus`: detected, acknowledged, resolved
+
+`OperationsLoggerService` centralizes event creation and metadata sanitization. It removes sensitive keys such as payloads, bodies, secrets, tokens, API keys, passwords, raw content, and exception details.
+
+## Queue Monitoring Philosophy
+
+`queue_metrics` records aggregate queue counts only: queue name, pending jobs, failed jobs, processed jobs placeholder, and measurement time.
+
+`QueueMonitorService` works from Laravel's standard `jobs` and `failed_jobs` tables and requires no Horizon or Redis. It can create warning events when configured pending or failed-job thresholds are exceeded.
+
+Processed job counts remain a placeholder because Laravel's database queue does not retain completed job rows by default.
+
+## Domain Health Monitoring Philosophy
+
+`domain_health_checks` stores format and readiness-oriented checks for configured public mailbox domains. `DomainHealthService` evaluates the configured domain pool, assigns a score, and records healthy, warning, or critical status.
+
+STEP19 does not perform DNS checks, blacklist lookups, provider calls, or domain verification. Future domain pool management can extend the service with those checks without changing the table purpose.
+
+## Failed Job Observability
+
+`FailedJobMonitorService` summarizes failed job counts and groups them by queue. It creates an operational event when failures exist, but it never stores failed job payloads or exception text in operations metadata.
+
+This gives future dashboards enough signal to show failed-job pressure while preserving privacy and avoiding accidental leakage of queued payloads.
+
+## Metrics Collection Strategy
+
+`SystemMetricsService` gathers structured arrays for:
+
+- App environment and debug state
+- Storage writability
+- Health record counts
+- Cleanup run counts
+- Abuse event counts
+- API usage log counts
+- Queue metrics
+- Domain health checks
+- Failed job summaries
+
+`operations:collect-metrics` stores queue and domain metrics and generates threshold events. `operations:health-summary` displays safe counts for operational data.
+
+## Scheduler Compatibility
+
+Scheduled metrics collection is config-ready through `OPERATIONS_METRICS_SCHEDULE_ENABLED`. When enabled, Laravel's scheduler can run `operations:collect-metrics` hourly or daily with `withoutOverlapping()`.
+
+Shared-hosting deployments can use a normal cron entry for Laravel's scheduler. No daemon, Horizon, Pulse, Prometheus, or external monitoring service is required.
+
+## Future Operations Dashboard Compatibility
+
+The operations tables and services are intentionally dashboard-ready but UI-free. A future operations center can read operations events, queue metrics, domain checks, health checks, cleanup runs, abuse events, API usage logs, and failed-job summaries without changing existing module boundaries.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:

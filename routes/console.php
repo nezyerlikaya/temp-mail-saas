@@ -27,3 +27,13 @@ if (config('production.health.schedule_enabled', false)) {
         default => $health->hourly(),
     };
 }
+
+if (config('operations.metrics.schedule_enabled', false)) {
+    $operations = Schedule::command('operations:collect-metrics')
+        ->withoutOverlapping();
+
+    match ((string) config('operations.metrics.schedule_frequency', 'hourly')) {
+        'daily' => $operations->daily(),
+        default => $operations->hourly(),
+    };
+}
