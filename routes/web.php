@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BillingWebhookController;
+use App\Http\Controllers\Admin\OperationsCenterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\PublicInboxController;
@@ -70,9 +71,35 @@ Route::get('/dashboard', DashboardController::class)
     ->middleware('auth')
     ->name('dashboard');
 
-Route::get('/admin', function () {
-    abort(403, 'Admin area reserved.');
-})->name('admin.index');
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['staff.active'])
+    ->group(function (): void {
+        Route::get('/', [OperationsCenterController::class, 'dashboard'])
+            ->middleware('staff.permission:operations.view')
+            ->name('index');
+        Route::get('/operations', [OperationsCenterController::class, 'dashboard'])
+            ->middleware('staff.permission:operations.view')
+            ->name('operations');
+        Route::get('/health', [OperationsCenterController::class, 'health'])
+            ->middleware('staff.permission:health.view')
+            ->name('health');
+        Route::get('/queue', [OperationsCenterController::class, 'queue'])
+            ->middleware('staff.permission:queue.view')
+            ->name('queue');
+        Route::get('/domains', [OperationsCenterController::class, 'domains'])
+            ->middleware('staff.permission:domains.view')
+            ->name('domains');
+        Route::get('/abuse', [OperationsCenterController::class, 'abuse'])
+            ->middleware('staff.permission:abuse.view')
+            ->name('abuse');
+        Route::get('/billing', [OperationsCenterController::class, 'billing'])
+            ->middleware('staff.permission:billing.view')
+            ->name('billing');
+        Route::get('/audit', [OperationsCenterController::class, 'audit'])
+            ->middleware('staff.permission:audit.view')
+            ->name('audit');
+    });
 
 Route::post('/locale', function (Request $request, LocaleService $locales) {
     $request->validate([

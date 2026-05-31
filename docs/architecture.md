@@ -439,6 +439,65 @@ Invalid signatures are rejected before queue processing. Rejected intakes do not
 
 STEP11 can add real provider adapters behind the existing contracts. STEP12 can build public inbox behavior on top of normalized messages created through the same storage service. Future provider webhook routes should be disabled by default until explicitly configured and must keep queue-first behavior.
 
+## STEP23 Admin Operations Center
+
+STEP23 introduces the first real operational staff interface. It is read-only and builds on the staff/RBAC, health, queue, domain, abuse, billing, cleanup, operations, and audit foundations created in earlier steps.
+
+The admin route space remains stable:
+
+- `/admin`
+- `/admin/operations`
+- `/admin/health`
+- `/admin/queue`
+- `/admin/domains`
+- `/admin/abuse`
+- `/admin/billing`
+- `/admin/audit`
+
+All routes use staff guard state through the existing staff middleware and enforce RBAC permissions server-side. Unauthenticated or unauthorized access returns `403`.
+
+## Operations Center Permissions
+
+STEP23 adds these permission slugs to the existing permission map:
+
+- `operations.view`
+- `health.view`
+- `queue.view`
+- `billing.view`
+- `audit.view`
+
+Existing `domains.view` and `abuse.view` permissions are reused. The permission model and role strategy are not replaced.
+
+## Dashboard Widgets
+
+The operations dashboard summarizes:
+
+- System health counts.
+- Readiness indicators.
+- Queue pending, processed, and failed totals.
+- Latest cleanup run.
+- Abuse event counts.
+- Billing customer/subscription/invoice counts.
+- Domain health totals.
+
+Widgets are intentionally informational. STEP23 does not add retry buttons, destructive actions, DNS actions, refunds, moderation actions, backup restore, or settings changes.
+
+## Centers
+
+The health, queue, domain, abuse, billing, and audit centers are read-only Blade screens using the shared admin layout and reusable card/table/empty-state components.
+
+Audit visibility aggregates:
+
+- `CleanupRun`
+- `OperationsEvent`
+- `BillingWebhookEvent`
+
+Sensitive metadata such as raw hashes, payment data, card data, and destructive operational controls are excluded from the UI.
+
+## Future Action Center Compatibility
+
+Future steps can add explicit action centers or workflows behind new permissions. STEP23 keeps this first admin surface read-only so operational visibility and authorization boundaries stabilize before mutation features are introduced.
+
 ## STEP11 Installer Foundation
 
 STEP11 adds a first-time setup and recovery foundation without introducing billing, licensing, updates, marketplaces, dashboards, or deployment automation. The installer lives under the reserved `/install` path and uses route names in the `installer.*` namespace.

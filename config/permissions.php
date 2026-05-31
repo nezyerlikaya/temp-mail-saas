@@ -15,6 +15,15 @@ return [
             'system.view' => 'View system',
             'system.manage' => 'Manage system',
         ],
+        'operations' => [
+            'operations.view' => 'View operations center',
+        ],
+        'health' => [
+            'health.view' => 'View health center',
+        ],
+        'queue' => [
+            'queue.view' => 'View queue center',
+        ],
         'content' => [
             'content.view' => 'View content',
             'content.manage' => 'Manage content',
@@ -35,6 +44,12 @@ return [
             'abuse.view' => 'View abuse',
             'abuse.manage' => 'Manage abuse',
         ],
+        'billing' => [
+            'billing.view' => 'View billing center',
+        ],
+        'audit' => [
+            'audit.view' => 'View audit center',
+        ],
         'settings' => [
             'settings.view' => 'View settings',
             'settings.manage' => 'Manage settings',
@@ -54,6 +69,9 @@ return [
                 'users.suspend',
                 'staff.view',
                 'system.view',
+                'operations.view',
+                'health.view',
+                'queue.view',
                 'content.view',
                 'content.manage',
                 'seo.view',
@@ -64,6 +82,8 @@ return [
                 'domains.manage',
                 'abuse.view',
                 'abuse.manage',
+                'billing.view',
+                'audit.view',
                 'settings.view',
             ],
         ],
@@ -71,9 +91,14 @@ return [
             'name' => 'Support',
             'permissions' => [
                 'users.view',
+                'operations.view',
+                'health.view',
+                'queue.view',
                 'mail.view',
                 'domains.view',
                 'abuse.view',
+                'billing.view',
+                'audit.view',
                 'settings.view',
             ],
         ],
