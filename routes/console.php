@@ -17,3 +17,13 @@ if (config('retention.schedule.enabled', false)) {
         default => $cleanup->hourly(),
     };
 }
+
+if (config('production.health.schedule_enabled', false)) {
+    $health = Schedule::command('system:health-check')
+        ->withoutOverlapping();
+
+    match ((string) config('production.health.schedule_frequency', 'hourly')) {
+        'daily' => $health->daily(),
+        default => $health->hourly(),
+    };
+}

@@ -852,6 +852,83 @@ It is protected by API key middleware and returns a foundation health payload on
 
 Future public API work can add scoped permissions, endpoint-specific limits, API dashboards, OpenAPI docs, webhooks, and mailbox/message/domain APIs on top of this foundation without replacing key storage, hashing, auth, usage logging, or feature gate integration.
 
+## STEP18 Production Hardening
+
+STEP18 prepares the application for production deployment without adding Horizon, Pulse, external error tracking providers, backup execution, restore execution, Kubernetes, Docker orchestration, CI/CD pipelines, or monitoring dashboards.
+
+The hardening foundation is shared-hosting compatible first and VPS/cloud compatible second. Services return structured, privacy-safe reports and avoid stack traces, secrets, payloads, credentials, raw API keys, raw IP values, and email content.
+
+## Health Monitoring Strategy
+
+`system_health_checks` stores health-focused audit rows with:
+
+- UUID
+- Check name
+- Health status
+- Safe message
+- Safe metadata
+- Checked timestamp
+
+`SystemHealthStatus` supports `healthy`, `warning`, and `critical`. `SystemHealthCheck` exposes `isHealthy()`, `isWarning()`, and `isCritical()` helpers.
+
+`App\Services\System\SystemHealthService` checks:
+
+- Database connectivity
+- Cache availability
+- Storage permissions
+- Queue configuration
+- Scheduler readiness
+- Installer lock state
+- Application key presence
+
+The existing `/health` route remains backward compatible. STEP18 adds deeper internal checks and the `system:health-check` command for operational use.
+
+## Production Readiness Strategy
+
+`App\Services\System\ProductionReadinessService` evaluates production-safe configuration and returns aggregate counts for passed checks, warnings, and failures. It checks debug mode, app key presence, HTTPS expectation, queue driver compatibility, mail transport placeholders, and writable storage.
+
+`system:readiness-check` displays only safe check names and aggregate counts. It does not expose environment values or secrets.
+
+## Error Tracking Abstraction
+
+`App\Services\System\ErrorTrackingService` centralizes error reporting behind a local logging fallback. It is ready for future Sentry or Bugsnag adapters without adding those providers now.
+
+Context data is sanitized before logging. Passwords, tokens, secrets, API keys, payloads, request bodies, and email bodies are removed from error-report context.
+
+## Backup Readiness Philosophy
+
+`App\Services\System\BackupReadinessService` verifies that configured backup source paths are readable and that the destination disk is configured. It does not create archives, run backup jobs, delete files, or perform restores.
+
+This keeps backup readiness safe for shared hosting while preparing future backup execution and restore workflows.
+
+## Scheduler Preparation
+
+`routes/console.php` can schedule `system:health-check` when `SYSTEM_HEALTH_SCHEDULE_ENABLED=true`. The default frequency is hourly, with daily support through configuration. `withoutOverlapping()` is used where Laravel's scheduler lock support is available.
+
+Shared-hosting deployments can run Laravel's scheduler through a normal cron entry and do not require Redis, Horizon, or a long-running process.
+
+## Logging Hardening
+
+STEP18 reinforces the privacy rules established in prior steps:
+
+- No API keys in logs.
+- No raw IP values where hashing is already used.
+- No passwords or secrets.
+- No email bodies or request payloads.
+- No stack traces in public health/readiness output.
+
+Operational records store only safe class names, check names, statuses, counts, and sanitized context.
+
+## Deployment Preparation
+
+The production foundation gives deployers a local, provider-free way to answer three questions before launch:
+
+1. Is the application healthy right now?
+2. Is the production configuration safe enough to deploy?
+3. Are backup paths and destination settings ready for future backup execution?
+
+Future observability and operations center work can build dashboards on top of the health table, readiness service, error tracking abstraction, and backup readiness checks without replacing these foundations.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:

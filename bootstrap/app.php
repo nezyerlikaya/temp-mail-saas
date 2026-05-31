@@ -1,6 +1,8 @@
 <?php
 
 use App\Console\Commands\CleanupExpiredMailCommand;
+use App\Console\Commands\SystemHealthCheckCommand;
+use App\Console\Commands\SystemReadinessCheckCommand;
 use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\EnsureApplicationInstalled;
 use App\Http\Middleware\EnsureInstallerAccessible;
@@ -21,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands([
         CleanupExpiredMailCommand::class,
+        SystemHealthCheckCommand::class,
+        SystemReadinessCheckCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
