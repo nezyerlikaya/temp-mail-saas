@@ -5,6 +5,7 @@ use App\Console\Commands\OperationsCollectMetricsCommand;
 use App\Console\Commands\OperationsHealthSummaryCommand;
 use App\Console\Commands\SystemHealthCheckCommand;
 use App\Console\Commands\SystemReadinessCheckCommand;
+use App\Console\Commands\SystemReleaseStatusCommand;
 use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\EnsureApplicationInstalled;
 use App\Http\Middleware\EnsureInstallerAccessible;
@@ -30,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         OperationsHealthSummaryCommand::class,
         SystemHealthCheckCommand::class,
         SystemReadinessCheckCommand::class,
+        SystemReleaseStatusCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([

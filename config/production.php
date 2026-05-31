@@ -9,6 +9,32 @@ return [
         )),
         'allow_log_mailer_in_production' => env('PRODUCTION_ALLOW_LOG_MAILER', false),
     ],
+    'release' => [
+        'target' => env('RELEASE_TARGET', 'rc1'),
+        'block_on_debug' => env('RELEASE_BLOCK_ON_DEBUG', true),
+        'block_on_missing_app_key' => env('RELEASE_BLOCK_ON_MISSING_APP_KEY', true),
+        'block_on_unwritable_storage' => env('RELEASE_BLOCK_ON_UNWRITABLE_STORAGE', true),
+        'warn_on_http_url' => env('RELEASE_WARN_ON_HTTP_URL', true),
+        'warn_on_sync_queue' => env('RELEASE_WARN_ON_SYNC_QUEUE', true),
+        'warn_on_log_mailer' => env('RELEASE_WARN_ON_LOG_MAILER', true),
+    ],
+    'deployment' => [
+        'required_writable_paths' => [
+            storage_path(),
+            storage_path('app'),
+            storage_path('framework'),
+            storage_path('logs'),
+            base_path('bootstrap/cache'),
+        ],
+        'recommended_cache_store' => env('PRODUCTION_RECOMMENDED_CACHE_STORE', 'database'),
+        'recommended_session_driver' => env('PRODUCTION_RECOMMENDED_SESSION_DRIVER', 'database'),
+    ],
+    'monitoring' => [
+        'health_route' => '/health',
+        'status_route' => '/status',
+        'up_route' => '/up',
+        'operations_metrics_required' => env('PRODUCTION_OPERATIONS_METRICS_REQUIRED', false),
+    ],
     'health' => [
         'logging_enabled' => env('SYSTEM_HEALTH_LOGGING_ENABLED', true),
         'schedule_enabled' => env('SYSTEM_HEALTH_SCHEDULE_ENABLED', false),

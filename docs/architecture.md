@@ -1584,3 +1584,56 @@ The structure supports shared hosting first while preserving a path to VPS scali
 - Queues can start with database or sync drivers and later move to Redis.
 - Inbound mail can start with simple adapters and later move to provider webhooks or dedicated workers.
 - Billing, RBAC, admin, and API modules can be added without breaking the homepage or health routes.
+
+## STEP30 Production Release Candidate
+
+STEP30 adds the RC1 readiness layer without changing product architecture or provisioning external infrastructure.
+
+## RC1 Readiness Architecture
+
+`ProductionReadinessChecklistService` aggregates production checks into:
+
+- Blockers
+- Warnings
+- Recommendations
+- Informational passed checks
+
+The checklist reviews deployment configuration, writable paths, backup readiness, monitoring readiness, and go-live route availability.
+
+`ReleaseStatusService` evaluates the checklist and returns one of three release states:
+
+- `ready`
+- `warning`
+- `blocked`
+
+The service is read-only. It does not execute deployments, backups, restores, queue workers, or infrastructure changes.
+
+## Release Status Command
+
+`system:release-status` displays a safe summary:
+
+- Release state
+- Target
+- Summary
+- Blocker count
+- Warning count
+- Recommendation count
+- Safe finding names and messages
+
+The command exits successfully for `ready` and `warning` states, and fails for `blocked` states so it can be used in manual release checklists or future CI pipelines.
+
+## Production Configuration
+
+`config/production.php` now includes RC1 options for release readiness behavior, deployment writable paths, monitoring readiness checks, queue/mail warning policy, and HTTPS warning policy.
+
+Defaults remain shared-hosting compatible. They warn on sync queues and log mailers, but do not provision infrastructure or require external services.
+
+## Backup And Monitoring Readiness
+
+The RC1 checklist reuses `BackupReadinessService`. It verifies readable backup source paths and configured backup destination disk without creating backup archives or attempting restores.
+
+The checklist also verifies health/status route registration and that `SystemHealthService` returns structured checks. Operations metrics and domain health checks can be required by configuration, but are not required by default so shared-hosting deployments can reach RC1 without external monitoring infrastructure.
+
+## Operational Release Notes
+
+RC1 readiness is a gate, not a deployment engine. Production deployment should still run environment review, migrations, writable path checks, scheduler setup if enabled, queue worker setup if async queues are enabled, manual browser QA, and backup/restore verification.
