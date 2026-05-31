@@ -1772,3 +1772,27 @@ The service records privacy-safe operations events:
 `mail:provider-sandbox-check` runs the validation from the console and prints only safe summaries. It does not print full payloads or secrets.
 
 Sandbox fixtures live under `tests/Fixtures/mail-providers` and use deterministic `example.test` addresses, fake message ids, and no personal data.
+
+## STEP38 Live Provider Staging Validation
+
+STEP38 hardens installer enforcement and adds a provider staging readiness layer.
+
+Installed-app enforcement now protects live and staging surfaces before installation is healthy:
+
+- `/login`
+- `/register`
+- `/dashboard`
+- `/admin`
+- `/admin/login`
+- `/api/*`
+- `/billing/*`
+- `/inbox`
+- Provider webhook endpoints
+
+Incomplete installs redirect browser requests to `/install` and return safe installer-required JSON responses for API/webhook style requests.
+
+`ProviderConnectivityValidationService` validates provider configuration, activation state, webhook route readiness, signing configuration readiness, and intake queue readiness without external HTTP calls or credential exposure.
+
+`StagingReadinessService` aggregates provider readiness, domain readiness, queue readiness, and installer readiness. It records privacy-safe operations events for staging validation start, pass, failure, and provider blockers.
+
+`system:staging-readiness` prints safe blocker, warning, and recommendation summaries for staging validation.

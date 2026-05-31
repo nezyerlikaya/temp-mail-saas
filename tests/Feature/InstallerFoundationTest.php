@@ -145,6 +145,8 @@ class InstallerFoundationTest extends TestCase
 
     public function test_existing_public_and_auth_routes_continue_working(): void
     {
+        app(InstallerLockService::class)->create();
+
         $this->get('/')->assertOk();
         $this->getJson('/health')->assertOk();
         $this->get('/status')->assertOk();

@@ -49,49 +49,52 @@ Route::get('/robots.txt', fn (RobotsService $robots) => response($robots->conten
 ]))->name('robots');
 
 Route::post('/billing/webhooks/{provider}', BillingWebhookController::class)
-    ->middleware('throttle:billing-webhooks')
+    ->middleware(['app.installed', 'throttle:billing-webhooks'])
     ->name('billing.webhooks.handle');
 
 Route::post('/webhooks/mailgun', MailProviderWebhookController::class)
     ->defaults('provider', 'mailgun')
-    ->middleware('throttle:billing-webhooks')
+    ->middleware(['app.installed', 'throttle:billing-webhooks'])
     ->name('webhooks.mailgun');
 Route::post('/webhooks/postmark', MailProviderWebhookController::class)
     ->defaults('provider', 'postmark')
-    ->middleware('throttle:billing-webhooks')
+    ->middleware(['app.installed', 'throttle:billing-webhooks'])
     ->name('webhooks.postmark');
 Route::post('/webhooks/ses', MailProviderWebhookController::class)
     ->defaults('provider', 'ses')
-    ->middleware('throttle:billing-webhooks')
+    ->middleware(['app.installed', 'throttle:billing-webhooks'])
     ->name('webhooks.ses');
 
-Route::get('/inbox', [PublicInboxController::class, 'index'])->name('inbox.index');
+Route::get('/inbox', [PublicInboxController::class, 'index'])
+    ->middleware('app.installed')
+    ->name('inbox.index');
 Route::post('/inbox/generate', [PublicInboxController::class, 'generate'])
-    ->middleware('throttle:inbox-mailbox-generation')
+    ->middleware(['app.installed', 'throttle:inbox-mailbox-generation'])
     ->name('inbox.generate');
 Route::post('/inbox/rotate', [PublicInboxController::class, 'rotate'])
-    ->middleware('throttle:inbox-mailbox-rotation')
+    ->middleware(['app.installed', 'throttle:inbox-mailbox-rotation'])
     ->name('inbox.rotate');
 Route::post('/inbox/forget', [PublicInboxController::class, 'forget'])
-    ->middleware('throttle:inbox-mailbox-rotation')
+    ->middleware(['app.installed', 'throttle:inbox-mailbox-rotation'])
     ->name('inbox.forget');
 Route::get('/inbox/messages', [PublicInboxController::class, 'messages'])
-    ->middleware('throttle:inbox-message-polling')
+    ->middleware(['app.installed', 'throttle:inbox-message-polling'])
     ->name('inbox.messages');
 Route::get('/inbox/messages/{uuid}', [PublicInboxController::class, 'show'])
-    ->middleware('throttle:inbox-message-detail')
+    ->middleware(['app.installed', 'throttle:inbox-message-detail'])
     ->name('inbox.messages.show');
 
 Route::get('/dashboard', DashboardController::class)
-    ->middleware('auth')
+    ->middleware(['app.installed', 'auth'])
     ->name('dashboard');
 
 Route::get('/admin/login', fn () => redirect()->route('login'))
+    ->middleware('app.installed')
     ->name('admin.login');
 
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware(['staff.active'])
+    ->middleware(['app.installed', 'staff.active'])
     ->group(function (): void {
         Route::get('/', [OperationsCenterController::class, 'dashboard'])
             ->middleware('staff.permission:operations.view')

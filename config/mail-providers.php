@@ -23,6 +23,17 @@ return [
         ],
     ],
 
+    'staging' => [
+        'mode' => env('MAIL_PROVIDER_STAGING_MODE', false),
+        'allowed_domains' => array_filter(array_map(
+            'trim',
+            explode(',', env('MAIL_PROVIDER_STAGING_ALLOWED_DOMAINS', 'example.test')),
+        )),
+        'provider_validation' => env('MAIL_PROVIDER_STAGING_PROVIDER_VALIDATION', true),
+        'webhook_validation' => env('MAIL_PROVIDER_STAGING_WEBHOOK_VALIDATION', true),
+        'metrics_enabled' => env('MAIL_PROVIDER_STAGING_METRICS_ENABLED', true),
+    ],
+
     'webhooks' => [
         'enabled' => env('MAIL_PROVIDER_WEBHOOKS_ENABLED', true),
         'paths' => [

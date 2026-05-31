@@ -11,6 +11,7 @@ use App\Console\Commands\SystemGoLiveStatusCommand;
 use App\Console\Commands\SystemHealthCheckCommand;
 use App\Console\Commands\SystemReadinessCheckCommand;
 use App\Console\Commands\SystemReleaseStatusCommand;
+use App\Console\Commands\SystemStagingReadinessCommand;
 use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\EnsureApplicationInstalled;
 use App\Http\Middleware\EnsureInstallerAccessible;
@@ -42,8 +43,13 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemHealthCheckCommand::class,
         SystemReadinessCheckCommand::class,
         SystemReleaseStatusCommand::class,
+        SystemStagingReadinessCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->priority([
+            EnsureApplicationInstalled::class,
+        ]);
+
         $middleware->alias([
             'api.key' => AuthenticateApiKey::class,
             'app.installed' => EnsureApplicationInstalled::class,
