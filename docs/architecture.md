@@ -6,6 +6,8 @@ Temp Mail SaaS v1 is prepared as a modular monolith. The application keeps one d
 
 STEP01 contains no business features. It only creates the foundation that later steps can extend without changing public route structure or replacing core conventions.
 
+STEP02 adds the central configuration and public health foundation. It still contains no Temp Mail business behavior.
+
 ## Folder Structure
 
 - `app/Services`: Business workflow layer. Controllers should stay thin and delegate decisions here.
@@ -54,15 +56,50 @@ Future modules should add configuration keys without removing or renaming existi
 Current public routes:
 
 - `/`: Placeholder homepage.
-- `/health`: Lightweight health response.
-- `/status`: Foundation status response.
+- `/health`: JSON health response.
+- `/status`: Public-safe status page.
 
 Reserved route spaces:
 
 - `/admin`: Reserved for a future admin module.
 - `/api`: Reserved for future API endpoints.
 
-The reserved routes are not implemented in STEP01.
+The reserved routes remain unimplemented after STEP02.
+
+## STEP02 Configuration Foundation
+
+STEP02 introduces system services that future modules can depend on without reading raw environment variables throughout the codebase.
+
+- `App\Services\System\AppConfigService`: Central typed access to public app name, support email placeholder, locale, fallback locale, timezone, default mailbox TTL, cleanup chunk size, inbound provider placeholder, and SEO defaults.
+- `App\Services\System\FeatureFlagService`: Reads `config/features.php` using dot notation. Unknown flags return `false` and never throw exceptions.
+- `App\Services\System\EnvironmentService`: Returns structured environment, app key presence, debug, cache, and storage availability information without exposing secret values.
+- `App\Services\System\HealthCheckService`: Builds the public-safe health report used by `/health` and the public status summary used by `/status`.
+
+Configuration remains split by concern and uses safe environment defaults. Future modules should add settings to the existing config files instead of introducing scattered `env()` calls inside services or controllers.
+
+## STEP02 Public Surfaces
+
+Current public routes:
+
+- `/`: Homepage showing STEP01 and STEP02 readiness only.
+- `/health`: JSON-only health response with safe status checks.
+- `/status`: Public-safe status page with no internal environment details.
+- `/up`: Laravel framework health route.
+
+The health and status outputs must never expose credentials such as app keys, database passwords, mail passwords, provider tokens, or API keys.
+
+## Installer Compatibility
+
+The configuration services are designed for a future installer without adding one now:
+
+- Missing or blank config values resolve to safe defaults.
+- App key presence is reported as a boolean only.
+- Storage and cache readiness are detectable without exposing paths beyond public-safe labels.
+- Feature flags default to disabled unless explicitly enabled.
+
+## Future Admin Compatibility
+
+The `/admin` route space remains reserved and unimplemented. Future admin work should consume `AppConfigService`, `FeatureFlagService`, `EnvironmentService`, and `HealthCheckService` rather than duplicating configuration or health logic.
 
 ## Extension Strategy
 

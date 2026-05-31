@@ -1,19 +1,19 @@
 <?php
 
-use App\Services\Core\FoundationService;
+use App\Services\System\HealthCheckService;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('pages.home');
 })->name('home');
 
-Route::get('/health', fn () => response()->json([
-    'status' => 'ok',
-]))->name('health');
+Route::get('/health', fn (HealthCheckService $health) => response()->json(
+    $health->report()
+))->name('health');
 
-Route::get('/status', fn (FoundationService $foundation) => response()->json(
-    $foundation->status()
-))->name('status');
+Route::get('/status', fn (HealthCheckService $health) => view('pages.status', [
+    'status' => $health->publicStatus(),
+]))->name('status');
 
 /*
 |--------------------------------------------------------------------------

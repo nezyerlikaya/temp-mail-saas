@@ -12,6 +12,6 @@ enum AppFeature: string
 
     public function enabled(): bool
     {
-        return (bool) config("features.{$this->value}", false);
+        return (bool) config("features.{$this->value}.enabled", false);
     }
 }

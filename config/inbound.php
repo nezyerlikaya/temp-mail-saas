@@ -11,6 +11,12 @@ return [
     |
     */
 
-    'driver' => env('INBOUND_MAIL_DRIVER', 'null'),
+    'provider' => env('INBOUND_MAIL_PROVIDER', 'null'),
+    'driver' => env('INBOUND_MAIL_DRIVER', env('INBOUND_MAIL_PROVIDER', 'null')),
+    'queue' => [
+        'enabled' => env('INBOUND_QUEUE_ENABLED', false),
+        'connection' => env('INBOUND_QUEUE_CONNECTION', env('QUEUE_CONNECTION', 'sync')),
+        'name' => env('INBOUND_QUEUE_NAME', 'inbound-mail'),
+    ],
     'drivers' => [],
 ];

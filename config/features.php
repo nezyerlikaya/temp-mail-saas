@@ -11,9 +11,39 @@ return [
     |
     */
 
-    'admin' => false,
-    'api' => false,
-    'billing' => false,
-    'custom_domains' => false,
-    'user_accounts' => false,
+    'auth' => [
+        'enabled' => env('FEATURE_AUTH_ENABLED', false),
+    ],
+
+    'admin' => [
+        'enabled' => env('FEATURE_ADMIN_ENABLED', false),
+    ],
+
+    'api' => [
+        'enabled' => env('FEATURE_API_ENABLED', false),
+    ],
+
+    'seo' => [
+        'enabled' => env('FEATURE_SEO_ENABLED', true),
+    ],
+
+    'localization' => [
+        'enabled' => env('FEATURE_LOCALIZATION_ENABLED', false),
+    ],
+
+    'billing' => [
+        'enabled' => env('FEATURE_BILLING_ENABLED', false),
+    ],
+
+    'inbound' => [
+        'enabled' => env('FEATURE_INBOUND_ENABLED', false),
+    ],
+
+    'custom_domains' => [
+        'enabled' => env('FEATURE_CUSTOM_DOMAINS_ENABLED', false),
+    ],
+
+    'user_accounts' => [
+        'enabled' => env('FEATURE_USER_ACCOUNTS_ENABLED', false),
+    ],
 ];

@@ -11,7 +11,12 @@ return [
     |
     */
 
-    'title' => env('APP_NAME', 'Temp Mail SaaS'),
-    'description' => 'A modular foundation for a temporary email SaaS platform.',
-    'robots' => 'index,follow',
+    'title' => env('SEO_DEFAULT_TITLE', env('APP_NAME', 'Temp Mail SaaS')),
+    'description' => env('SEO_DEFAULT_DESCRIPTION', 'A modular foundation for a temporary email SaaS platform.'),
+    'robots' => env('SEO_ROBOTS', 'index,follow'),
+    'defaults' => [
+        'title' => env('SEO_DEFAULT_TITLE', env('APP_NAME', 'Temp Mail SaaS')),
+        'description' => env('SEO_DEFAULT_DESCRIPTION', 'A modular foundation for a temporary email SaaS platform.'),
+        'robots' => env('SEO_ROBOTS', 'index,follow'),
+    ],
 ];

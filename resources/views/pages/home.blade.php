@@ -8,7 +8,7 @@
                     Temp Mail SaaS
                 </div>
                 <div class="rounded-full border border-cyan-400/30 px-4 py-2 text-sm text-cyan-100">
-                    STEP01 Ready
+                    STEP02 Ready
                 </div>
             </nav>
 
@@ -23,24 +23,28 @@
                     </h1>
 
                     <p class="mt-6 text-lg leading-8 text-slate-300">
-                        Architecture is ready for future mail, domain, billing, abuse, SEO, admin,
-                        and API modules. Controllers stay thin, services own business workflows,
-                        and contracts keep future integrations replaceable.
+                        STEP01 is complete and STEP02 has added the central configuration foundation.
+                        Health and public status surfaces are available while business modules remain
+                        intentionally unimplemented.
                     </p>
                 </div>
 
-                <div class="mt-10 grid gap-4 sm:grid-cols-3" x-data="{ ready: true }">
+                <div class="mt-10 grid gap-4 sm:grid-cols-4" x-data="{ ready: true }">
                     <div class="rounded-2xl border border-white/10 bg-slate-900/70 p-5">
-                        <div class="text-sm text-slate-400">Pattern</div>
-                        <div class="mt-2 font-semibold text-white">Services + Contracts</div>
+                        <div class="text-sm text-slate-400">STEP01</div>
+                        <div class="mt-2 font-semibold text-white">Architecture complete</div>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-slate-900/70 p-5">
-                        <div class="text-sm text-slate-400">Frontend</div>
-                        <div class="mt-2 font-semibold text-white">Blade + Alpine + Tailwind</div>
+                        <div class="text-sm text-slate-400">STEP02</div>
+                        <div class="mt-2 font-semibold text-white">Configuration ready</div>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-slate-900/70 p-5">
-                        <div class="text-sm text-slate-400">Status</div>
-                        <div class="mt-2 font-semibold text-emerald-300" x-text="ready ? 'Foundation ready' : 'Preparing'"></div>
+                        <div class="text-sm text-slate-400">Health</div>
+                        <div class="mt-2 font-semibold text-emerald-300">/health available</div>
+                    </div>
+                    <div class="rounded-2xl border border-white/10 bg-slate-900/70 p-5">
+                        <div class="text-sm text-slate-400">Status Page</div>
+                        <div class="mt-2 font-semibold text-emerald-300" x-text="ready ? '/status available' : 'Preparing'"></div>
                     </div>
                 </div>
             </div>

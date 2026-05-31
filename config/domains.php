@@ -15,4 +15,12 @@ return [
     'verification' => [
         'enabled' => false,
     ],
+    'rotation' => [
+        'enabled' => env('DOMAIN_ROTATION_ENABLED', false),
+        'strategy' => env('DOMAIN_ROTATION_STRATEGY', 'manual'),
+    ],
+    'health' => [
+        'enabled' => env('DOMAIN_HEALTH_CHECKS_ENABLED', false),
+        'failure_threshold' => env('DOMAIN_HEALTH_FAILURE_THRESHOLD', 3),
+    ],
 ];
