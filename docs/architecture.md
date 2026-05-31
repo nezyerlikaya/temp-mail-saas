@@ -793,6 +793,65 @@ This keeps content SEO behavior centralized and ready for future admin SEO editi
 
 The settings table, service layer, sitemap service, robots service, structured data service, and content helpers provide the foundation for future admin SEO screens. Admin editing, validation workflows, preview tools, generated OG images, hreflang management, and search-engine submission remain future steps.
 
+## STEP17 API Access Foundation
+
+STEP17 prepares API access without exposing mailbox, message, domain, billing, or other business API endpoints. It does not add an API dashboard, API key UI, OpenAPI documentation, SDK generation, or webhooks.
+
+## API Key Architecture
+
+`api_keys` stores user-owned API credentials using a UUID, display name, key prefix, hashed key, status, optional expiration and revocation timestamps, safe metadata, and last-used time. Raw API keys are never stored.
+
+`App\Services\Api\ApiKeyService` generates secure random keys, stores only an HMAC hash, verifies incoming keys by prefix plus hash, revokes keys, rotates keys, and returns the raw key only at creation or rotation time. Rotation revokes the old key and creates a new credential record.
+
+## Hashing Strategy
+
+API key hashing uses HMAC SHA-256 with the application key as the secret. The database keeps only:
+
+- A short prefix for lookup.
+- A full hash for verification.
+
+This keeps key verification efficient without storing recoverable secrets.
+
+## Authentication Strategy
+
+`App\Services\Api\ApiAuthService` resolves bearer tokens from `Authorization: Bearer ...` and also supports `X-API-Key` for future compatibility. It returns a structured auth result with the API key, resolved user, and failure reason.
+
+`AuthenticateApiKey` middleware validates the credential, attaches `api_key` and `api_user` request attributes, and sets the request user resolver. Invalid credentials receive a generic JSON `401`; disabled plan access receives a generic JSON `403`.
+
+## Usage Logging
+
+`api_usage_logs` records safe aggregate request information only:
+
+- API key reference
+- Endpoint
+- Method
+- Response status
+- Request count
+- Occurrence time
+
+It does not store request payloads, response bodies, mail data, headers, credentials, or raw keys. `ApiUsageLoggerService` can silently skip logging when disabled or unavailable.
+
+## Rate Limit And Feature Gate Strategy
+
+`App\Services\Api\ApiRateLimitService` resolves plan-aware API access state and per-minute limits through `FeatureGateService`. STEP15 feature gates now include:
+
+- `api_enabled`
+- `api_rate_limit_per_minute`
+
+Free accounts default to API disabled, Member receives moderate limits, and Premium receives larger limits. STEP17 does not enforce endpoint-specific throttles yet because no business endpoints exist; the service is ready for future endpoint policies and abuse-system integration.
+
+## Route Foundation
+
+`routes/api.php` is now registered under Laravel's `/api` prefix. The only placeholder route is:
+
+- `GET /api/v1/ping`
+
+It is protected by API key middleware and returns a foundation health payload only. It exposes no mailbox, message, domain, billing, or user business data.
+
+## Future API Compatibility
+
+Future public API work can add scoped permissions, endpoint-specific limits, API dashboards, OpenAPI docs, webhooks, and mailbox/message/domain APIs on top of this foundation without replacing key storage, hashing, auth, usage logging, or feature gate integration.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:

@@ -9,6 +9,8 @@ return [
             'polling_interval' => 15000,
             'allowed_domains' => ['example.test'],
             'priority_processing_placeholder' => false,
+            'api_enabled' => false,
+            'api_rate_limit_per_minute' => 5,
         ],
         'member' => [
             'mailbox_generation_limit' => 20,
@@ -16,6 +18,8 @@ return [
             'polling_interval' => 10000,
             'allowed_domains' => ['example.test'],
             'priority_processing_placeholder' => false,
+            'api_enabled' => true,
+            'api_rate_limit_per_minute' => 60,
         ],
         'premium' => [
             'mailbox_generation_limit' => 60,
@@ -23,6 +27,8 @@ return [
             'polling_interval' => 5000,
             'allowed_domains' => ['example.test'],
             'priority_processing_placeholder' => true,
+            'api_enabled' => true,
+            'api_rate_limit_per_minute' => 300,
         ],
     ],
 ];
