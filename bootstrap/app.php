@@ -12,6 +12,7 @@ use App\Console\Commands\ProviderActivationStatusCommand;
 use App\Console\Commands\SystemFirstLiveCheckCommand;
 use App\Console\Commands\SystemGoLiveStatusCommand;
 use App\Console\Commands\SystemHealthCheckCommand;
+use App\Console\Commands\SystemLoadReadinessCommand;
 use App\Console\Commands\SystemReadinessCheckCommand;
 use App\Console\Commands\SystemReleaseStatusCommand;
 use App\Console\Commands\SystemStagingReadinessCommand;
@@ -47,6 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemFirstLiveCheckCommand::class,
         SystemGoLiveStatusCommand::class,
         SystemHealthCheckCommand::class,
+        SystemLoadReadinessCommand::class,
         SystemReadinessCheckCommand::class,
         SystemReleaseStatusCommand::class,
         SystemStagingReadinessCommand::class,

@@ -1842,3 +1842,15 @@ STEP41 adds a read-only first real mail validation layer without external HTTP c
 `MailReceptionTraceService` traces the lifecycle from provider intake to inbound intake, queued job handoff, email message storage, and public inbox visibility. It supports lookup by intake UUID, provider message id, email message UUID, and mailbox address. Trace output excludes raw provider payloads, raw HTML, secret headers, signature secrets, and storage paths.
 
 `mail:first-real-check` prints safe readiness and optional trace diagnostics for the first real message validation workflow.
+
+## STEP42 Production Load & Stress Validation
+
+STEP42 adds a no-traffic load validation framework for production readiness review.
+
+`ProductionLoadValidationService` evaluates queue readiness, inbox limits, provider intake safety, domain pool filtering, cache readiness, and monitoring readiness. It records safe operations events for `load_validation_started`, `load_validation_ready`, and `load_validation_blocked`.
+
+`StressReadinessService` reviews queue throughput assumptions, cleanup chunk assumptions, inbox polling, provider intake, billing, and operations assumptions. It records `stress_review_completed` or `stress_review_warning`.
+
+`LoadScenarioService` documents scenarios such as inbox creation volume, inbox polling, provider intake, queue backlog, and provider failure checks. Scenarios are documentation-only and never generate load.
+
+`system:load-readiness` prints safe blocker, warning, recommendation, and scenario summaries.
