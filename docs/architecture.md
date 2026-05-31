@@ -284,6 +284,51 @@ A minimal Blade component, `resources/views/components/locale-switcher.blade.php
 
 The schema is ready for future RTL languages, admin-created custom translations, missing translation tracking, and translation editor screens. STEP06 intentionally excludes localization CRUD, editor UI, import/export, automatic machine translation, translation progress dashboards, and SEO hreflang management so future admin localization work can build on stable service and schema boundaries.
 
+## STEP07 Media Library Foundation
+
+STEP07 adds a reusable media metadata layer for future avatars, blog images, SEO images, content media, system assets, mailbox attachments, and integrations. It does not implement upload screens, media manager UI, image editing, thumbnails, conversions, downloads, blog integration, or mailbox attachments.
+
+The `media` table stores metadata only:
+
+- Stable identity: `uuid`.
+- Storage metadata: disk, directory, filename, storage driver, and storage path.
+- File metadata: original filename, extension, MIME type, size, checksum, visibility, and status.
+- Image metadata: optional width and height.
+- Ownership metadata: optional normal user or staff uploader.
+
+No file blobs or binary content are stored in the database.
+
+## Media Storage Strategy
+
+`config/media.php` centralizes media defaults. Local storage works by default through Laravel's filesystem configuration. Public and S3-compatible disks remain supported through existing filesystem disks without making S3 required.
+
+Path generation is centralized in `App\Services\Media\MediaService` and follows a collection/year/month strategy:
+
+- `avatars/YYYY/MM`
+- `blog/YYYY/MM`
+- `seo/YYYY/MM`
+- `content/YYYY/MM`
+- `system/YYYY/MM`
+- `attachments/YYYY/MM`
+
+Visibility defaults to private, with public defaults reserved for safe public collections such as blog, SEO, and system assets.
+
+## Media Service And DTO
+
+`App\Services\Media\MediaService` creates media records, generates UUIDs, builds safe storage paths, determines visibility, and validates required metadata. It does not handle uploaded files or manipulate images.
+
+`App\DTOs\Media\MediaData` exposes only public-safe metadata: UUID, filename, MIME type, size, and visibility. Internal disks, directories, storage paths, and checksums are intentionally excluded.
+
+## Future Processing Pipeline
+
+`App\Contracts\Media\MediaProcessorContract` reserves a stable processing boundary for future image optimization, thumbnail generation, WebP/AVIF conversion, virus scanning, or attachment processing. No processors are implemented in STEP07.
+
+## CDN And Attachment Compatibility
+
+The media foundation is CDN-ready because storage paths, visibility, disk, and storage driver are tracked independently from public DTO output. Future CDN URL generation can be added behind services without changing the media schema.
+
+Mailbox attachments can later reuse the same metadata table while keeping attachment downloads, authorization, quarantine, and retention policies in dedicated future modules.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:
