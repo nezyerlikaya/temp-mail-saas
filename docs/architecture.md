@@ -367,6 +367,40 @@ SEO fields are stored directly on content records but are not rendered publicly 
 
 `App\DTOs\Content\ContentData` exposes only safe presentation fields: title, slug, status, type, and published timestamp. Internal metadata such as author IDs, media IDs, and SEO fields are intentionally excluded.
 
+## STEP09 Email Message Storage Foundation
+
+STEP09 adds storage-only infrastructure for future inbound email processing. It does not receive real email, expose webhooks, poll IMAP, run an SMTP server, parse MIME, store raw payloads, save attachment files, create mailboxes, expose public inboxes, or add admin message screens.
+
+The message model is split into three tables:
+
+- `email_messages`: normalized message metadata, safe body fields, processing state, abuse/quarantine state, retention tier, expiration timestamps, and lifecycle timestamps.
+- `email_message_recipients`: normalized recipient rows for `to`, `cc`, and `bcc`, including email, optional name, local part, and domain.
+- `email_attachments`: attachment metadata only, with optional future `media_id`, filenames, MIME type, size, checksum, scan status, storage labels, and status.
+
+No raw MIME payloads or attachment binaries are stored in these tables.
+
+## Email Message Lifecycle
+
+Message status is represented by `EmailMessageStatus`: received, queued, processed, failed, quarantined, expired, and deleted. Parse state is represented separately by `EmailParseStatus`: pending, parsing, parsed, and failed.
+
+`App\Models\EmailMessage` provides helpers for expiration, quarantine, processed state, and basic processed/failed transitions. These helpers are intentionally small because MIME parsing and queues are deferred.
+
+## Attachment Metadata Strategy
+
+`EmailAttachment` stores metadata only. `media_id` is nullable so STEP09 can track attachments before future file storage exists. A future inbound pipeline may create media records after validation/scanning and link them back to attachment metadata.
+
+Attachment scan status is represented by `EmailAttachmentScanStatus`: pending, clean, suspicious, infected, and skipped. STEP09 does not perform scanning.
+
+## Retention Strategy
+
+`RetentionTier` supports short, standard, and premium retention. `EmailRetentionService` calculates expiration timestamps from `config/retention.php` and exposes an expired-message query for cleanup.
+
+`mail:cleanup-expired` is a conservative command foundation. By default it marks expired messages as expired. It only soft-deletes when `EMAIL_EXPIRED_MESSAGE_ACTION=delete` is explicitly configured. It does not delete attachment files.
+
+## Future Compatibility
+
+STEP10 can add queue and inbound intake workers that call `EmailMessageStorageService` with normalized arrays. STEP12 can build public inbox behavior on top of stored messages, recipients, retention state, and attachment metadata without changing this schema. API endpoints, realtime events, mailbox generation, and admin message screens remain future modules.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:

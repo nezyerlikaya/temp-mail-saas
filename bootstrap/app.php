@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use App\Console\Commands\CleanupExpiredMailCommand;
 use App\Http\Middleware\EnsureStaffHasPermission;
 use App\Http\Middleware\EnsureStaffIsActive;
 use App\Http\Middleware\SetLocale;
@@ -14,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([
+        CleanupExpiredMailCommand::class,
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'staff.active' => EnsureStaffIsActive::class,
