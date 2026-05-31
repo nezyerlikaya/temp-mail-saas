@@ -34,6 +34,31 @@ return [
         'metrics_enabled' => env('MAIL_PROVIDER_STAGING_METRICS_ENABLED', true),
     ],
 
+    'activation' => [
+        'states' => [
+            'local' => env('LOCAL_PROVIDER_ACTIVATION_STATE', 'active'),
+            'mailgun' => env('MAILGUN_PROVIDER_ACTIVATION_STATE', 'inactive'),
+            'postmark' => env('POSTMARK_PROVIDER_ACTIVATION_STATE', 'inactive'),
+            'ses' => env('SES_PROVIDER_ACTIVATION_STATE', 'inactive'),
+            'amazon_ses' => env('SES_PROVIDER_ACTIVATION_STATE', 'inactive'),
+        ],
+        'allowed_states' => ['inactive', 'staging', 'ready', 'active', 'suspended'],
+        'safety' => [
+            'require_staging_passed' => env('PROVIDER_ACTIVATION_REQUIRE_STAGING_PASSED', true),
+            'require_webhook_ready' => env('PROVIDER_ACTIVATION_REQUIRE_WEBHOOK_READY', true),
+            'require_queue_ready' => env('PROVIDER_ACTIVATION_REQUIRE_QUEUE_READY', true),
+            'require_installer_ready' => env('PROVIDER_ACTIVATION_REQUIRE_INSTALLER_READY', true),
+            'allow_active_without_signing_key' => env('PROVIDER_ACTIVATION_ALLOW_UNSIGNED', false),
+        ],
+        'readiness' => [
+            'providers' => array_filter(array_map(
+                'trim',
+                explode(',', env('PROVIDER_ACTIVATION_PROVIDERS', 'mailgun,postmark,ses')),
+            )),
+            'metrics_enabled' => env('PROVIDER_ACTIVATION_METRICS_ENABLED', true),
+        ],
+    ],
+
     'webhooks' => [
         'enabled' => env('MAIL_PROVIDER_WEBHOOKS_ENABLED', true),
         'paths' => [

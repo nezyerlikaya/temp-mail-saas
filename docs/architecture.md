@@ -1796,3 +1796,29 @@ Incomplete installs redirect browser requests to `/install` and return safe inst
 `StagingReadinessService` aggregates provider readiness, domain readiness, queue readiness, and installer readiness. It records privacy-safe operations events for staging validation start, pass, failure, and provider blockers.
 
 `system:staging-readiness` prints safe blocker, warning, and recommendation summaries for staging validation.
+
+## STEP39 Production Provider Activation
+
+STEP39 adds a production provider activation readiness layer without calling provider APIs or storing provider credentials.
+
+Provider activation states are config-driven:
+
+- `inactive`
+- `staging`
+- `ready`
+- `active`
+- `suspended`
+
+`provider_activation_audits` records provider state transitions with previous state, new state, reason, performer label, sanitized metadata, and timestamps. No secrets or credentials are stored.
+
+`ProviderSafetyCheckService` verifies staging readiness, webhook readiness, queue readiness, installer readiness, signing configuration, activation state validity, and idempotency readiness.
+
+`ProviderActivationService` owns readiness summaries and state transitions. It records safe operations events:
+
+- `provider_activation_requested`
+- `provider_activation_ready`
+- `provider_activation_blocked`
+- `provider_activation_completed`
+- `provider_activation_suspended`
+
+`provider:activation-status` prints safe provider states, blocker counts, warning counts, and passed check counts.
