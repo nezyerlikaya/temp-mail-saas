@@ -1728,3 +1728,28 @@ Deployment guidance lives under `docs/deployment`:
 - Provider onboarding.
 
 The go-live strategy is conservative: launch only after environment-specific manual verification confirms health routes, admin protection, inbox behavior, provider webhooks, domain pool readiness, backup readiness, and rollback documentation.
+
+## STEP36 Production Deployment And First Live Validation
+
+STEP36 adds a first-live validation package for the first production environment. It is read-only and does not perform deployment automation, SSH operations, DNS changes, provider account setup, backup execution, or rollback execution.
+
+`ProductionEnvironmentValidationService` validates:
+
+- `APP_ENV`
+- `APP_DEBUG`
+- `APP_KEY`
+- Database connectivity.
+- Cache readiness.
+- Session driver.
+- Queue driver.
+- Mail configuration placeholder status.
+- Filesystem/storage readiness.
+- Installer lock status.
+
+`ServerReadinessService` validates writable paths, `bootstrap/cache`, PHP version compatibility, required PHP extensions, scheduler readiness, and queue worker readiness.
+
+`FirstLiveSmokeTestService` validates route-level readiness for homepage, health, status, installer lock behavior, inbox, sitemap, robots, API ping protection, and admin protection without making external HTTP calls.
+
+`system:first-live-check` aggregates environment, server, and smoke checks and outputs only safe status, blocker, and warning messages.
+
+First-live deployment guidance lives in `docs/deployment/first-live-environment.md`, and provider/domain validation guidance lives in `docs/deployment/provider-domain-validation.md`.

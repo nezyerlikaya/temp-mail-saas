@@ -5,6 +5,7 @@ use App\Console\Commands\MonitoringHealthReviewCommand;
 use App\Console\Commands\MonitoringIncidentReviewCommand;
 use App\Console\Commands\OperationsCollectMetricsCommand;
 use App\Console\Commands\OperationsHealthSummaryCommand;
+use App\Console\Commands\SystemFirstLiveCheckCommand;
 use App\Console\Commands\SystemGoLiveStatusCommand;
 use App\Console\Commands\SystemHealthCheckCommand;
 use App\Console\Commands\SystemReadinessCheckCommand;
@@ -34,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         MonitoringIncidentReviewCommand::class,
         OperationsCollectMetricsCommand::class,
         OperationsHealthSummaryCommand::class,
+        SystemFirstLiveCheckCommand::class,
         SystemGoLiveStatusCommand::class,
         SystemHealthCheckCommand::class,
         SystemReadinessCheckCommand::class,

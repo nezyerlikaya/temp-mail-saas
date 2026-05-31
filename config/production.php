@@ -84,4 +84,32 @@ return [
             'provider_mapping_checklist' => true,
         ],
     ],
+    'first_live_validation' => [
+        'require_app_env_production' => env('FIRST_LIVE_REQUIRE_PRODUCTION_ENV', true),
+        'warn_on_sync_queue' => env('FIRST_LIVE_WARN_ON_SYNC_QUEUE', true),
+        'warn_on_log_mailer' => env('FIRST_LIVE_WARN_ON_LOG_MAILER', true),
+        'require_installer_lock' => env('FIRST_LIVE_REQUIRE_INSTALLER_LOCK', true),
+    ],
+    'smoke_tests' => [
+        'routes' => [
+            'home',
+            'health',
+            'status',
+            'inbox.index',
+            'sitemap',
+            'robots',
+            'api.v1.ping',
+            'admin.index',
+            'installer.index',
+        ],
+    ],
+    'server_readiness' => [
+        'minimum_php_version' => env('FIRST_LIVE_MINIMUM_PHP_VERSION', '8.2.0'),
+        'required_extensions' => array_filter(array_map(
+            'trim',
+            explode(',', env('FIRST_LIVE_REQUIRED_EXTENSIONS', 'ctype,curl,dom,fileinfo,filter,hash,mbstring,openssl,pcre,pdo,session,tokenizer,xml')),
+        )),
+        'scheduler_required' => env('FIRST_LIVE_SCHEDULER_REQUIRED', false),
+        'queue_worker_required' => env('FIRST_LIVE_QUEUE_WORKER_REQUIRED', false),
+    ],
 ];
