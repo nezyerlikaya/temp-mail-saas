@@ -23,6 +23,21 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class CleanupRun extends Model
 {
+    public function isRunning(): bool
+    {
+        return $this->status === CleanupRunStatus::Running;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->status === CleanupRunStatus::Completed;
+    }
+
+    public function isFailed(): bool
+    {
+        return $this->status === CleanupRunStatus::Failed;
+    }
+
     protected function casts(): array
     {
         return [

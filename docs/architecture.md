@@ -550,6 +550,56 @@ Future realtime delivery through WebSockets, Reverb, server-sent events, or prov
 
 Because the session stores only the current mailbox address, cleanup can continue to operate at the message-retention layer from STEP09 and STEP10. Future mailbox cleanup, user-owned inbox history, domain rotation, billing limits, and abuse controls can be added without changing the anonymous public route contract introduced in STEP12.
 
+## STEP13 Cleanup And Retention System
+
+STEP13 centralizes mail and inbound intake retention without adding an admin dashboard, attachment file deletion, storage lifecycle automation, billing retention rules, or queue monitoring dependencies.
+
+`config/retention.php` owns conservative defaults for tier-based email expiration, chunk size, dry-run behavior, hard-delete permission, inbound intake retention, privacy-safe audit logging, attachment metadata behavior, and optional scheduler frequency.
+
+## Retention Lifecycle
+
+`App\Services\Mail\EmailRetentionService` remains the source for tier-based message expiration. Existing `expirationFor()` behavior is preserved, while `determineExpirationDate()` and `isExpired()` provide explicit lifecycle helpers for future callers.
+
+`App\Services\Mail\MailCleanupService` processes expired records with `chunkById`. This avoids loading large result sets into memory and keeps cleanup suitable for shared-hosting cron execution.
+
+The default message lifecycle is conservative:
+
+1. Locate messages whose `expires_at` timestamp has passed.
+2. Mark them as expired.
+3. Leave physical attachment files untouched.
+4. Hide expired records from the STEP12 public inbox.
+
+Hard deletion occurs only when `RETENTION_HARD_DELETE_ENABLED=true`. When enabled, the service deletes recipient rows and attachment metadata before permanently deleting the message. Storage files are intentionally left untouched for a future storage cleanup step.
+
+## Inbound Intake Cleanup
+
+Old processed, failed, and rejected inbound intake records are deleted after the configured intake retention window. Cleanup uses chunks and never writes headers, normalized payloads, raw payloads, message bodies, or other sensitive intake details to console output or audit records.
+
+## Cleanup Audit Strategy
+
+Each full cleanup creates a privacy-safe `cleanup_runs` audit record when cleanup logging is enabled. Audit rows store a UUID, cleanup type, status, dry-run state, aggregate counters, timestamps, and a short safe error classification only.
+
+Audit rows never store mailbox addresses, subjects, bodies, attachment paths, provider payloads, credentials, or stack traces. `CleanupRun` exposes `isRunning()`, `isCompleted()`, and `isFailed()` helpers for future operational screens.
+
+## Dry-Run And Command Strategy
+
+`mail:cleanup-expired` now delegates to `MailCleanupService`. It supports:
+
+- `--dry-run`
+- `--chunk=`
+
+The command outputs aggregate counters only. Dry-run mode scans records and reports the expected impact without mutating messages, intakes, recipients, or attachment metadata.
+
+## Scheduler Compatibility
+
+Laravel 13 scheduler registration lives in `routes/console.php`. When `RETENTION_SCHEDULE_ENABLED=true`, the cleanup command runs hourly by default or daily when configured. `withoutOverlapping()` prevents concurrent executions where the configured cache driver supports scheduler locks.
+
+Shared-hosting deployments can invoke Laravel's scheduler from a standard cron entry and do not require Horizon, Pulse, Redis, or a long-running worker.
+
+## Future Compatibility
+
+The cleanup service leaves attachment file deletion, object-storage lifecycle rules, mailbox history cleanup, admin cleanup dashboards, and billing-tier controls for later steps. The aggregate audit model and service boundaries are ready for those features without exposing private mail data.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:

@@ -16,7 +16,7 @@ return [
     'default_ttl_minutes' => env('TEMPMAIL_DEFAULT_TTL_MINUTES', 60),
     'default_email_retention_tier' => env('EMAIL_DEFAULT_RETENTION_TIER', 'standard'),
     'cleanup_chunk_size' => env('RETENTION_CLEANUP_CHUNK_SIZE', 100),
-    'cleanup_dry_run' => env('RETENTION_CLEANUP_DRY_RUN', false),
+    'cleanup_dry_run_default' => env('RETENTION_CLEANUP_DRY_RUN_DEFAULT', false),
     'hard_delete_enabled' => env('RETENTION_HARD_DELETE_ENABLED', false),
     'expired_message_action' => env('EMAIL_EXPIRED_MESSAGE_ACTION', 'mark'),
     'intake_retention_minutes' => env('INBOUND_INTAKE_RETENTION_MINUTES', 10080),

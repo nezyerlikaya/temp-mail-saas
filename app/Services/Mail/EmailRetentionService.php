@@ -28,6 +28,16 @@ final class EmailRetentionService extends Service
         return ($from ?? now())->copy()->addMinutes(max(1, $minutes));
     }
 
+    public function determineExpirationDate(RetentionTier|string|null $tier = null, ?Carbon $from = null): Carbon
+    {
+        return $this->expirationFor($tier, $from);
+    }
+
+    public function isExpired(EmailMessage $message, ?Carbon $now = null): bool
+    {
+        return $message->expires_at !== null && $message->expires_at->lte($now ?? now());
+    }
+
     public function expiredMessagesQuery(?Carbon $now = null): Builder
     {
         return EmailMessage::query()
