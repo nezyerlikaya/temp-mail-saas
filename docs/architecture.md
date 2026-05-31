@@ -233,6 +233,57 @@ They are available for future admin routes but are not applied broadly in STEP05
 
 Staff authorization gates are prepared around `StaffUser::hasPermission()` and active staff status. Normal user authentication from STEP04 remains separate and unaffected. This separation keeps member account access, future staff access, and future RBAC policy work independently extensible.
 
+## STEP06 Languages And Translation Foundation
+
+STEP06 adds localization infrastructure without creating a language admin module, translation editor, import/export flow, localized route prefixes, or SEO hreflang management.
+
+Languages are stored in `languages` with:
+
+- `code`: Unique locale code such as `en`, `tr`, or future regional variants.
+- `name` and `native_name`: Display labels for UI.
+- `direction`: `ltr` or `rtl`, cast through `LanguageDirection`.
+- `is_active`: Whether the locale can be selected at runtime.
+- `is_default`: Logical default locale. The model ensures only one default language remains active as default.
+- `sort_order`: Stable display ordering.
+
+Translations are stored in `translations` as individual rows, not JSON blobs. Each translation belongs to a language and has `group`, `key`, nullable `value`, and `is_custom`. The unique key is `language_id + group + key`, which keeps the schema compatible with future admin editing and missing-translation tracking.
+
+## Locale Detection Strategy
+
+`App\Services\System\LocaleService` determines locale in this order:
+
+1. Authenticated user preference when valid.
+2. Session locale when valid.
+3. Request locale when valid.
+4. Configured default locale.
+5. Configured fallback locale.
+
+The service validates requested locales against active language rows when the table exists. If the database is unavailable during early install or testing, it falls back to configured locales from `config/tempmail.php`.
+
+`SetLocale` middleware applies the resolved locale for web requests and sets Carbon's locale when possible. Errors are swallowed intentionally so health checks and early install states do not break.
+
+## Translation Fallback Strategy
+
+`App\Services\System\TranslationService` resolves text in this order:
+
+1. Database translation for the requested locale.
+2. Database translation for the fallback locale.
+3. Laravel language file entry.
+4. Explicit default text passed by the caller.
+5. The `group.key` string.
+
+This structure is cache-ready but avoids cache invalidation complexity until an admin translation editor exists.
+
+## Locale Switching
+
+`POST /locale` is registered as `locale.switch`. It accepts a locale code, validates it through `LocaleService`, stores it in the session, and redirects back using Laravel's safe back redirect behavior. It does not require authentication and does not introduce localized route prefixes.
+
+A minimal Blade component, `resources/views/components/locale-switcher.blade.php`, provides a CSRF-protected language selector for active locales.
+
+## Future Localization Compatibility
+
+The schema is ready for future RTL languages, admin-created custom translations, missing translation tracking, and translation editor screens. STEP06 intentionally excludes localization CRUD, editor UI, import/export, automatic machine translation, translation progress dashboards, and SEO hreflang management so future admin localization work can build on stable service and schema boundaries.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:

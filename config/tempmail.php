@@ -19,6 +19,17 @@ return [
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
     'timezone' => env('APP_TIMEZONE', 'UTC'),
 
+    'localization' => [
+        'enabled' => env('FEATURE_LOCALIZATION_ENABLED', true),
+        'default_locale' => env('APP_LOCALE', 'en'),
+        'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+        'supported_locales' => array_filter(array_map(
+            'trim',
+            explode(',', env('TEMPMAIL_SUPPORTED_LOCALES', 'en,tr')),
+        )),
+        'session_key' => env('TEMPMAIL_LOCALE_SESSION_KEY', 'locale'),
+    ],
+
     'architecture' => [
         'type' => 'modular_monolith',
         'controllers' => 'thin',

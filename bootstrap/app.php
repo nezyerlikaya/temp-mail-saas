@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use App\Http\Middleware\EnsureStaffHasPermission;
 use App\Http\Middleware\EnsureStaffIsActive;
+use App\Http\Middleware\SetLocale;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'staff.active' => EnsureStaffIsActive::class,
             'staff.permission' => EnsureStaffHasPermission::class,
+        ]);
+
+        $middleware->web(append: [
+            SetLocale::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -28,7 +28,7 @@ return [
     ],
 
     'localization' => [
-        'enabled' => env('FEATURE_LOCALIZATION_ENABLED', false),
+        'enabled' => env('FEATURE_LOCALIZATION_ENABLED', true),
     ],
 
     'billing' => [

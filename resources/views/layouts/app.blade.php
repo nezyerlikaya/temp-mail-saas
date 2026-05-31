@@ -19,5 +19,6 @@
         <main>
             @yield('content')
         </main>
+        <x-locale-switcher />
     </body>
 </html>
