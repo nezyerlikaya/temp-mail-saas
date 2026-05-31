@@ -24,6 +24,11 @@ class Plan extends Model
         return $this->hasMany(UserPlanAssignment::class);
     }
 
+    public function organizations(): HasMany
+    {
+        return $this->hasMany(Organization::class);
+    }
+
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_plan_assignments')

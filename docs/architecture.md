@@ -1003,6 +1003,84 @@ Shared-hosting deployments can use a normal cron entry for Laravel's scheduler. 
 
 The operations tables and services are intentionally dashboard-ready but UI-free. A future operations center can read operations events, queue metrics, domain checks, health checks, cleanup runs, abuse events, API usage logs, and failed-job summaries without changing existing module boundaries.
 
+## STEP20 Enterprise And Multi-Tenant Foundation
+
+STEP20 adds an enterprise and tenant-aware foundation while keeping the application a shared-database Laravel SaaS. It does not introduce full multi-database tenancy, a tenancy package, organization UI, team invitation emails, SSO/SAML/OIDC, custom domain verification, SSL automation, enterprise admin dashboards, domain ownership management, or audit dashboards.
+
+The foundation prepares organization ownership, team membership, tenant context, organization-aware feature gates, and future enterprise boundaries without changing existing public inbox, API, auth, RBAC, installer, abuse, observability, or billing foundations.
+
+## Shared-Database Enterprise Strategy
+
+Organizations are modeled as first-party records in the existing database. Future tenant-aware tables can add nullable `organization_id` columns where ownership is needed, but STEP20 avoids broad schema rewrites. This keeps shared-hosting compatibility and avoids early commitment to separate database tenancy.
+
+No tenancy package is added yet because the current product does not need request-wide database switching, tenant-specific migrations, isolated connections, or tenant route prefixes. The current goal is ownership and context readiness, not hard isolation.
+
+## Organization Model
+
+`organizations` stores:
+
+- UUID
+- Name and unique slug
+- Status
+- Optional owner user
+- Optional plan
+- Sanitized metadata
+
+`OrganizationStatus` supports active, inactive, and suspended states. `OrganizationService` creates organizations, normalizes unique slugs, assigns owners, sanitizes metadata, and checks organization status.
+
+Organization metadata is intended for safe operational labels only. Secrets, tokens, and passwords are stripped by the service layer.
+
+## Membership Model
+
+`organization_members` connects users to organizations with a role, status, optional inviter, and joined timestamp. The unique `organization_id + user_id` constraint prevents duplicate membership rows.
+
+Roles:
+
+- Owner
+- Admin
+- Member
+- Viewer
+
+Statuses:
+
+- Invited
+- Active
+- Suspended
+- Removed
+
+`OrganizationService` can add members, mark members removed, and check active membership. Removed members remain as non-active membership history rather than being physically deleted.
+
+## Tenant Context Strategy
+
+`TenantContextService` stores the current organization ID in the session using a configurable key. It validates that the current user is an active member of an active organization before accepting or returning context.
+
+Invalid, suspended, inactive, or unauthorized organization context is cleared automatically. STEP20 does not add route prefixes or global tenant middleware; future UI and API work can opt into the context service where needed.
+
+## Feature Gate Resolution Order
+
+`FeatureGateService` now supports organization-aware plan resolution while preserving existing user-plan behavior.
+
+Resolution order:
+
+1. Organization plan when an explicit organization is passed or a valid tenant context exists.
+2. Active user plan assignment.
+3. User `account_tier` fallback.
+4. Free default.
+
+This prepares enterprise plan behavior without adding checkout, recurring billing, invoices, or payment provider identifiers.
+
+## Future SSO Compatibility
+
+`config/enterprise.php` includes SSO placeholders but STEP20 does not implement SAML, OIDC, social login, SCIM, or external identity providers. Future SSO work can attach provider settings to organizations without replacing the membership model.
+
+## Future Custom Domain Compatibility
+
+Enterprise custom domain placeholders live in configuration only. STEP20 does not create domain ownership tables, DNS validation, or SSL automation. Future domain pool management can link domains to organizations once domain ownership workflows are introduced.
+
+## Audit Boundary Preparation
+
+STEP20 establishes organization IDs as a future audit boundary. Existing operations, abuse, and API logs are not broadly rewritten in this step, but future loggers can safely accept organization context from `TenantContextService` and store additive `organization_id` references where appropriate.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:
