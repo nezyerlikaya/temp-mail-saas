@@ -49,4 +49,28 @@ return [
             'warn_on_test_domain' => env('DOMAIN_ONBOARDING_WARN_ON_TEST_DOMAIN', true),
         ],
     ],
+    'live_activation' => [
+        'require_active_domain' => env('LIVE_DOMAIN_REQUIRE_ACTIVE_DOMAIN', true),
+        'require_onboarding_active' => env('LIVE_DOMAIN_REQUIRE_ONBOARDING_ACTIVE', true),
+        'require_provider_mapping' => env('LIVE_DOMAIN_REQUIRE_PROVIDER_MAPPING', true),
+        'require_mailbox_generation' => env('LIVE_DOMAIN_REQUIRE_MAILBOX_GENERATION', true),
+        'review' => [
+            'require_mx' => env('LIVE_DOMAIN_REQUIRE_MX_READY', true),
+            'require_spf' => env('LIVE_DOMAIN_REQUIRE_SPF_READY', true),
+            'require_dkim' => env('LIVE_DOMAIN_REQUIRE_DKIM_READY', true),
+            'require_dmarc' => env('LIVE_DOMAIN_REQUIRE_DMARC_READY', true),
+            'require_provider_mapping' => env('LIVE_DOMAIN_REQUIRE_PROVIDER_MAPPING_READY', true),
+        ],
+        'rollback' => [
+            'fallback_domain' => env('LIVE_DOMAIN_FALLBACK_DOMAIN', env('PUBLIC_MAILBOX_DOMAIN', 'example.test')),
+            'require_fallback_ready' => env('LIVE_DOMAIN_REQUIRE_FALLBACK_READY', true),
+            'suspension_ready' => env('LIVE_DOMAIN_SUSPENSION_READY', true),
+            'mailbox_generation_safe' => env('LIVE_DOMAIN_MAILBOX_GENERATION_SAFE', true),
+            'rollback_documented' => env('LIVE_DOMAIN_ROLLBACK_DOCUMENTED', true),
+        ],
+        'observability' => [
+            'operations_events_required' => env('LIVE_DOMAIN_EVENTS_REQUIRED', true),
+            'domain_audits_required' => env('LIVE_DOMAIN_AUDITS_REQUIRED', true),
+        ],
+    ],
 ];

@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\CleanupExpiredMailCommand;
+use App\Console\Commands\DomainLiveReadinessCommand;
 use App\Console\Commands\DomainOnboardingStatusCommand;
 use App\Console\Commands\MailFirstRealCheckCommand;
 use App\Console\Commands\MailProviderSandboxCheckCommand;
@@ -42,6 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands([
         CleanupExpiredMailCommand::class,
+        DomainLiveReadinessCommand::class,
         DomainOnboardingStatusCommand::class,
         MailFirstRealCheckCommand::class,
         MailProviderSandboxCheckCommand::class,

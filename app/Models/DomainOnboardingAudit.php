@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'previous_state',
     'new_state',
     'reason',
+    'review_type',
+    'recommendation',
     'metadata',
 ])]
 class DomainOnboardingAudit extends Model
