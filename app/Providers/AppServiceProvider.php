@@ -52,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
     private function registerRateLimiter(string $name, AbuseEventType $type): void
     {
         RateLimiter::for($name, function (Request $request) use ($type): Limit {
-            $profile = app(RateLimitProfileService::class)->for($type);
+            $profile = app(RateLimitProfileService::class)->for($type, $request->user());
             $key = app(AbuseSignalService::class)->limiterKey($request);
 
             return Limit::perMinute($profile['per_minute'])

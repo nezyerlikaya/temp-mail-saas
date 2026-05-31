@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'default_plan' => 'free',
+    'plans' => [
+        'free' => [
+            'mailbox_generation_limit' => 10,
+            'retention_tier' => 'short',
+            'polling_interval' => 15000,
+            'allowed_domains' => ['example.test'],
+            'priority_processing_placeholder' => false,
+        ],
+        'member' => [
+            'mailbox_generation_limit' => 20,
+            'retention_tier' => 'standard',
+            'polling_interval' => 10000,
+            'allowed_domains' => ['example.test'],
+            'priority_processing_placeholder' => false,
+        ],
+        'premium' => [
+            'mailbox_generation_limit' => 60,
+            'retention_tier' => 'premium',
+            'polling_interval' => 5000,
+            'allowed_domains' => ['example.test'],
+            'priority_processing_placeholder' => true,
+        ],
+    ],
+];

@@ -2,6 +2,8 @@
 
 namespace App\Services\Mail;
 
+use App\Models\User;
+use App\Services\Billing\FeatureGateService;
 use App\Services\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -21,6 +23,10 @@ final class PublicMailboxService extends Service
         'webmaster',
     ];
 
+    public function __construct(
+        private readonly FeatureGateService $features,
+    ) {}
+
     public function current(Request $request): ?string
     {
         $address = $request->session()->get($this->sessionKey());
@@ -30,7 +36,7 @@ final class PublicMailboxService extends Service
 
     public function generate(Request $request): string
     {
-        $address = $this->makeAddress();
+        $address = $this->makeAddress($request->user());
         $request->session()->put($this->sessionKey(), $address);
 
         return $address;
@@ -67,7 +73,7 @@ final class PublicMailboxService extends Service
         return $local.'@'.$domain;
     }
 
-    public function allowedDomains(): array
+    public function allowedDomains(?User $user = null): array
     {
         $domains = config('domains.public_mailbox.allowed_domains', []);
         $domains = is_array($domains) ? $domains : [];
@@ -76,7 +82,12 @@ final class PublicMailboxService extends Service
             $domains,
         ))));
 
-        return $domains ?: [$this->defaultDomain()];
+        $domains = $domains ?: [$this->defaultDomain()];
+        $planDomains = $this->features->featureValue('allowed_domains', $user, $domains);
+        $planDomains = is_array($planDomains) ? $planDomains : $domains;
+        $allowed = array_values(array_intersect($domains, $planDomains));
+
+        return $allowed ?: $domains;
     }
 
     public function defaultDomain(): string
@@ -86,13 +97,13 @@ final class PublicMailboxService extends Service
         return $domain !== '' ? $domain : 'example.test';
     }
 
-    private function makeAddress(): string
+    private function makeAddress(?User $user = null): string
     {
         do {
             $local = $this->makeLocalPart();
         } while (in_array($local, self::RESERVED_PARTS, true));
 
-        return $local.'@'.$this->selectDomain();
+        return $local.'@'.$this->selectDomain($user);
     }
 
     private function makeLocalPart(): string
@@ -108,16 +119,22 @@ final class PublicMailboxService extends Service
         return $part;
     }
 
-    private function selectDomain(): string
+    private function selectDomain(?User $user = null): string
     {
-        $domains = $this->allowedDomains();
+        $domains = $this->allowedDomains($user);
 
         return $domains[array_rand($domains)];
     }
 
     private function domainAllowed(string $domain): bool
     {
-        return in_array(Str::lower($domain), $this->allowedDomains(), true);
+        $domains = config('domains.public_mailbox.allowed_domains', []);
+        $domains = is_array($domains) ? $domains : [];
+
+        return in_array(Str::lower($domain), array_map(
+            fn (mixed $allowed): string => Str::lower(trim((string) $allowed)),
+            $domains ?: [$this->defaultDomain()],
+        ), true);
     }
 
     private function sessionKey(): string

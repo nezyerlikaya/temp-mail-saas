@@ -6,6 +6,7 @@ use App\Enums\StaffStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -30,6 +31,11 @@ class StaffUser extends Authenticatable
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_staff_user');
+    }
+
+    public function assignedPlanAssignments(): HasMany
+    {
+        return $this->hasMany(UserPlanAssignment::class, 'assigned_by_staff_id');
     }
 
     public function hasRole(string $slug): bool

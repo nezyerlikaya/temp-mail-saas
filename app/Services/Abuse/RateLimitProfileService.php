@@ -3,11 +3,17 @@
 namespace App\Services\Abuse;
 
 use App\Enums\AbuseEventType;
+use App\Models\User;
+use App\Services\Billing\FeatureGateService;
 use App\Services\Service;
 
 final class RateLimitProfileService extends Service
 {
-    public function for(AbuseEventType|string $action): array
+    public function __construct(
+        private readonly FeatureGateService $features,
+    ) {}
+
+    public function for(AbuseEventType|string $action, ?User $user = null): array
     {
         $action = $action instanceof AbuseEventType ? $action->value : $action;
         $configKey = match ($action) {
@@ -21,9 +27,16 @@ final class RateLimitProfileService extends Service
         };
         $profile = $configKey !== null ? config("abuse.{$configKey}", []) : [];
 
+        $perMinute = max(1, (int) ($profile['per_minute'] ?? config('abuse.rate_limits.per_minute', 60)));
+
+        if ($action === AbuseEventType::MailboxGeneration->value) {
+            $planLimit = max(1, (int) $this->features->featureValue('mailbox_generation_limit', $user, $perMinute));
+            $perMinute = min($perMinute, $planLimit);
+        }
+
         return [
             'action' => $action,
-            'per_minute' => max(1, (int) ($profile['per_minute'] ?? config('abuse.rate_limits.per_minute', 60))),
+            'per_minute' => $perMinute,
             'cooldown_seconds' => max(1, (int) ($profile['cooldown_seconds'] ?? config('abuse.cooldown_seconds', 60))),
         ];
     }

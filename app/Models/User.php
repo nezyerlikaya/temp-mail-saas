@@ -9,6 +9,8 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -33,6 +35,55 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    public function planAssignments(): HasMany
+    {
+        return $this->hasMany(UserPlanAssignment::class);
+    }
+
+    public function activePlan(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Plan::class,
+            UserPlanAssignment::class,
+            'user_id',
+            'id',
+            'id',
+            'plan_id',
+        )
+            ->where('plans.is_active', true)
+            ->where(function ($query): void {
+                $query->whereNull('user_plan_assignments.starts_at')
+                    ->orWhere('user_plan_assignments.starts_at', '<=', now());
+            })
+            ->where(function ($query): void {
+                $query->whereNull('user_plan_assignments.expires_at')
+                    ->orWhere('user_plan_assignments.expires_at', '>', now());
+            })
+            ->latest('user_plan_assignments.id');
+    }
+
+    public function isFree(): bool
+    {
+        return $this->planSlug() === AccountTier::Free->value;
+    }
+
+    public function isMember(): bool
+    {
+        return $this->planSlug() === AccountTier::Member->value;
+    }
+
+    public function isPremium(): bool
+    {
+        return $this->planSlug() === AccountTier::Premium->value;
+    }
+
+    public function planSlug(): string
+    {
+        return $this->activePlan()->value('slug')
+            ?? $this->account_tier?->value
+            ?? AccountTier::Free->value;
+    }
 
     /**
      * Get the attributes that should be cast.

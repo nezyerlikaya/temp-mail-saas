@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Billing\FeatureGateService;
 use App\Services\Mail\PublicInboxMessageService;
 use App\Services\Mail\PublicMailboxService;
 use Illuminate\Http\JsonResponse;
@@ -11,11 +12,18 @@ use Illuminate\View\View;
 
 final class PublicInboxController extends Controller
 {
-    public function index(Request $request, PublicMailboxService $mailboxes): View
-    {
+    public function index(
+        Request $request,
+        PublicMailboxService $mailboxes,
+        FeatureGateService $features,
+    ): View {
         return view('pages.inbox', [
             'mailbox' => $mailboxes->current($request),
-            'pollingInterval' => (int) config('tempmail.public_inbox.polling_interval_ms', 15000),
+            'pollingInterval' => (int) $features->featureValue(
+                'polling_interval',
+                $request->user(),
+                config('tempmail.public_inbox.polling_interval_ms', 15000),
+            ),
         ]);
     }
 

@@ -5,12 +5,18 @@ namespace App\Services\Mail;
 use App\Enums\EmailMessageStatus;
 use App\Enums\RetentionTier;
 use App\Models\EmailMessage;
+use App\Models\User;
+use App\Services\Billing\FeatureGateService;
 use App\Services\Service;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 final class EmailRetentionService extends Service
 {
+    public function __construct(
+        private readonly FeatureGateService $features,
+    ) {}
+
     public function defaultTier(): RetentionTier
     {
         return RetentionTier::tryFrom((string) config('retention.email.default_tier', RetentionTier::Standard->value))
@@ -26,6 +32,15 @@ final class EmailRetentionService extends Service
         $minutes = (int) config("retention.email.tiers.{$tier->value}", 1440);
 
         return ($from ?? now())->copy()->addMinutes(max(1, $minutes));
+    }
+
+    public function tierForUser(?User $user = null): RetentionTier
+    {
+        return RetentionTier::tryFrom((string) $this->features->featureValue(
+            'retention_tier',
+            $user,
+            $this->defaultTier()->value,
+        )) ?? $this->defaultTier();
     }
 
     public function determineExpirationDate(RetentionTier|string|null $tier = null, ?Carbon $from = null): Carbon

@@ -660,6 +660,80 @@ Failed login attempts create a low-severity observed event. Login cooldowns crea
 
 STEP14 deliberately has no abuse admin UI. The event schema, safe logger, profiles, and decision service provide a stable foundation for future moderation dashboards, CAPTCHA integration, trusted proxy configuration, account-tier policy, and operational review without changing public endpoint contracts.
 
+## STEP15 Premium Plans And Feature Gates
+
+STEP15 adds Free, Member, and Premium plan differentiation without integrating payment providers, recurring subscriptions, checkout, invoices, coupons, billing webhooks, billing admin screens, or API monetization.
+
+The existing `account_tier` user field remains intact as a backward-compatible fallback. New manual assignments take precedence when an active assignment exists.
+
+## Plan Model
+
+`plans` stores billing-ready plan identity without provider-specific data:
+
+- UUID
+- Name
+- Unique slug
+- Optional description
+- Active state
+- System-plan state
+- Sort order
+
+`PlanSeeder` idempotently creates or updates the system plans:
+
+- `free`
+- `member`
+- `premium`
+
+The seeder is safe to rerun and leaves room for future billing adapters without coupling plans to Stripe, Paddle, Lemon Squeezy, or another provider.
+
+## Manual Assignment Foundation
+
+`user_plan_assignments` links a user to a plan with optional staff attribution, start time, expiration time, and internal notes. It deliberately stores no payment provider IDs.
+
+Assignments support future staff-managed plan changes while the admin UI remains out of scope. `User::activePlan()` resolves an active assignment whose time window includes the current time. When no active assignment exists, feature resolution falls back to the existing `account_tier` value and then to Free.
+
+Relationships include:
+
+- `Plan::assignments()`
+- `Plan::users()`
+- `User::planAssignments()`
+- `User::activePlan()`
+- `StaffUser::assignedPlanAssignments()`
+
+Plan and user helpers provide `isFree()`, `isMember()`, and `isPremium()` checks.
+
+## Feature Gate Strategy
+
+`config/features-gates.php` defines plan-driven values for:
+
+- Mailbox generation limit
+- Retention tier
+- Inbox polling interval
+- Allowed public mailbox domains
+- Priority-processing placeholder
+
+`App\Services\Billing\FeatureGateService` resolves the current plan, checks boolean capabilities, returns feature values, and supplies Free-plan fallbacks. It catches plan-table lookup failures so installer and recovery states remain safe before migrations are available.
+
+## Public Inbox Integration
+
+Anonymous inbox visitors use Free-plan defaults. Authenticated users can receive plan-aware mailbox domain selection and polling intervals. Existing config-backed domain inventory remains authoritative: plan gates can narrow an available domain pool but cannot inject a domain outside `config/domains.php`.
+
+Mailbox generation protection remains compatible with STEP14. The effective generation limit is the lower of the global abuse ceiling and the plan quota, so a paid tier cannot bypass abuse safeguards.
+
+## Retention Mapping
+
+`EmailRetentionService::tierForUser()` maps plan configuration to retention tiers:
+
+- Free: short
+- Member: standard
+- Premium: premium
+
+The existing inbound storage default remains unchanged when no user context exists. This preserves STEP09 and STEP10 behavior while preparing future user-owned mailbox flows for plan-aware retention.
+
+## Future Billing And Checkout Compatibility
+
+STEP15 introduces plan identity and assignment state only. A future billing module can attach provider subscriptions, checkout sessions, webhook state, invoices, and cancellation rules behind new billing services without replacing the current plan schema or public inbox contract.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:
