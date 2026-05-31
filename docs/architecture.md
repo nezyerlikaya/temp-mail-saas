@@ -137,6 +137,43 @@ The username service performs no database writes. Future registration and profil
 - Billing can add subscription models later without storing provider identifiers on users.
 - API tokens can be introduced later without enabling API business endpoints in STEP03.
 
+## STEP04 Authentication Foundation
+
+STEP04 adds Laravel-native normal-user account access. The existing `/`, `/health`, `/status`, and `/up` routes remain unchanged. The `/admin` and `/api` spaces remain reserved and unimplemented.
+
+Normal-user routes now include:
+
+- `/login` and `/logout`
+- `/register`
+- `/forgot-password` and `/reset-password/{token}`
+- `/verify-email` and `/email/verification-notification`
+- `/confirm-password`
+- `/dashboard`
+
+The dashboard is an authenticated placeholder only. It shows a greeting, account tier, account status, and email verification state. It deliberately contains no mailbox, billing, staff, or admin links.
+
+## Account Access Flow
+
+Registration uses `App\Services\User\UsernameService` when an optional username is supplied. Usernames are normalized before validation, checked against reserved names, and stored as the initial public slug. New accounts start with the free tier, active status, API access disabled, two-factor authentication disabled, and a recorded password change timestamp.
+
+Registration also includes a lightweight bot-prevention foundation: a hidden honeypot field and a configurable minimum submit duration. External CAPTCHA services remain out of scope.
+
+## Login Security
+
+Login uses Laravel's session guard, password hashing, and rate limiter. Successful login regenerates the session and updates last-login and last-seen timestamps. Failed authentication returns a generic message. Suspended and inactive accounts are constrained out of authentication without revealing account state.
+
+Logout invalidates the current session and regenerates the CSRF token.
+
+## Email Verification And Password Reset
+
+The `User` model implements Laravel's email verification contract. Verification notice, signed verification, and resend routes are ready for local-safe mail drivers and future SMTP configuration.
+
+Password reset uses Laravel's broker and token table. Forgot-password responses use the same public message whether an account exists or not, reducing account enumeration risk.
+
+## Admin And Staff Exclusion
+
+STEP04 authenticates normal users only. Admin panels, staff guards, staff login routes, roles, permissions, and RBAC are intentionally deferred so future authorization design can be added without mixing trust levels into the member access flow.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:

@@ -7,8 +7,13 @@
                 <div class="text-sm font-semibold uppercase tracking-[0.35em] text-cyan-300">
                     Temp Mail SaaS
                 </div>
-                <div class="rounded-full border border-cyan-400/30 px-4 py-2 text-sm text-cyan-100">
-                    STEP02 Ready
+                <div class="flex items-center gap-3">
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="text-sm font-medium text-cyan-300 hover:text-cyan-200">Dashboard</a>
+                    @else
+                        <a href="{{ route('login') }}" class="text-sm font-medium text-cyan-300 hover:text-cyan-200">Log in</a>
+                        <a href="{{ route('register') }}" class="rounded-full border border-cyan-400/30 px-4 py-2 text-sm text-cyan-100 hover:border-cyan-300/60">Register</a>
+                    @endauth
                 </div>
             </nav>
 
@@ -23,9 +28,9 @@
                     </h1>
 
                     <p class="mt-6 text-lg leading-8 text-slate-300">
-                        STEP01 is complete and STEP02 has added the central configuration foundation.
-                        Health and public status surfaces are available while business modules remain
-                        intentionally unimplemented.
+                        STEP01 architecture and STEP02 configuration foundations are complete.
+                        STEP04 adds normal user account access while mailboxes and other business
+                        modules remain intentionally unimplemented.
                     </p>
                 </div>
 
