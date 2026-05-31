@@ -1690,3 +1690,41 @@ STEP34 adds safe console commands:
 - `monitoring:incident-review`
 
 Runbooks live under `docs/runbooks` and cover queue failures, provider failures, billing webhook failures, and incident response.
+
+## STEP35 Launch Preparation And Go-Live Checklist
+
+STEP35 adds the final internal launch readiness layer. It remains read-only and does not deploy, provision infrastructure, execute backups, execute restores, create DNS records, or create provider accounts.
+
+`LaunchChecklistService` aggregates launch checks across:
+
+- Infrastructure.
+- Security.
+- Monitoring.
+- Backups.
+- Providers.
+- Domains.
+- Billing.
+- Operations.
+
+Checks are classified as blockers, warnings, recommendations, or informational items. The service reuses existing production readiness, backup readiness, and uptime readiness foundations.
+
+`GoLiveStatusService` converts the launch checklist into a simple status:
+
+- `ready`
+- `warning`
+- `blocked`
+
+`RollbackReadinessService` validates rollback prerequisites, backup readiness, deployment note availability, and restore prerequisite documentation. It is checklist-only and never performs rollback or restore actions.
+
+`system:go-live-status` displays a safe go-live summary with blocker, warning, and recommendation counts.
+
+Deployment guidance lives under `docs/deployment`:
+
+- Shared hosting.
+- VPS deployment.
+- Queue workers.
+- Scheduler.
+- Domain onboarding.
+- Provider onboarding.
+
+The go-live strategy is conservative: launch only after environment-specific manual verification confirms health routes, admin protection, inbox behavior, provider webhooks, domain pool readiness, backup readiness, and rollback documentation.

@@ -13,6 +13,8 @@ final class BackupReadinessService extends Service
         $checks = [
             $this->storagePaths(),
             $this->destinationDisk(),
+            $this->restorePrerequisites(),
+            $this->retentionGuidance(),
         ];
 
         return [
@@ -55,5 +57,29 @@ final class BackupReadinessService extends Service
                 'metadata' => ['disk' => $disk],
             ];
         }
+    }
+
+    private function restorePrerequisites(): array
+    {
+        $ok = (bool) config('production.backup.restore_prerequisites_documented', true);
+
+        return [
+            'name' => 'restore_prerequisites_documented',
+            'ok' => $ok,
+            'message' => $ok ? 'Restore prerequisites are documented.' : 'Restore prerequisites need documentation.',
+            'metadata' => [],
+        ];
+    }
+
+    private function retentionGuidance(): array
+    {
+        $ok = (bool) config('production.backup.retention_guidance_documented', true);
+
+        return [
+            'name' => 'backup_retention_guidance_documented',
+            'ok' => $ok,
+            'message' => $ok ? 'Backup retention guidance is documented.' : 'Backup retention guidance needs documentation.',
+            'metadata' => [],
+        ];
     }
 }

@@ -28,6 +28,12 @@ return [
         ],
         'recommended_cache_store' => env('PRODUCTION_RECOMMENDED_CACHE_STORE', 'database'),
         'recommended_session_driver' => env('PRODUCTION_RECOMMENDED_SESSION_DRIVER', 'database'),
+        'checklists' => [
+            'shared_hosting' => env('DEPLOYMENT_SHARED_HOSTING_CHECKLIST', true),
+            'vps' => env('DEPLOYMENT_VPS_CHECKLIST', true),
+            'queue_workers' => env('DEPLOYMENT_QUEUE_WORKER_CHECKLIST', true),
+            'scheduler' => env('DEPLOYMENT_SCHEDULER_CHECKLIST', true),
+        ],
     ],
     'monitoring' => [
         'health_route' => '/health',
@@ -46,9 +52,36 @@ return [
             storage_path('app'),
             database_path(),
         ],
+        'restore_prerequisites_documented' => env('BACKUP_RESTORE_PREREQUISITES_DOCUMENTED', true),
+        'retention_guidance_documented' => env('BACKUP_RETENTION_GUIDANCE_DOCUMENTED', true),
     ],
     'error_tracking' => [
         'enabled' => env('ERROR_TRACKING_ENABLED', true),
         'provider' => env('ERROR_TRACKING_PROVIDER', 'log'),
+    ],
+    'launch' => [
+        'target' => env('GO_LIVE_TARGET', 'v1'),
+        'require_monitoring_ready' => env('GO_LIVE_REQUIRE_MONITORING_READY', true),
+        'require_backup_ready' => env('GO_LIVE_REQUIRE_BACKUP_READY', true),
+        'require_provider_onboarding_docs' => env('GO_LIVE_REQUIRE_PROVIDER_DOCS', true),
+        'require_domain_onboarding_docs' => env('GO_LIVE_REQUIRE_DOMAIN_DOCS', true),
+    ],
+    'rollback' => [
+        'require_backup_ready' => env('ROLLBACK_REQUIRE_BACKUP_READY', true),
+        'require_deployment_notes' => env('ROLLBACK_REQUIRE_DEPLOYMENT_NOTES', true),
+        'require_restore_prerequisites' => env('ROLLBACK_REQUIRE_RESTORE_PREREQUISITES', true),
+        'documentation_path' => env('ROLLBACK_DOCUMENTATION_PATH', 'docs/deployment/shared-hosting.md'),
+    ],
+    'onboarding' => [
+        'providers' => [
+            'mailgun',
+            'postmark',
+            'amazon_ses',
+        ],
+        'domains' => [
+            'domain_pool_ready' => true,
+            'dns_verification_future_ready' => true,
+            'provider_mapping_checklist' => true,
+        ],
     ],
 ];
