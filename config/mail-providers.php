@@ -1,5 +1,10 @@
 <?php
 
+use App\Services\Mail\Providers\LocalInboundProvider;
+use App\Services\Mail\Providers\MailgunInboundProvider;
+use App\Services\Mail\Providers\PostmarkInboundProvider;
+use App\Services\Mail\Providers\SesInboundProvider;
+
 return [
     'default' => env('MAIL_PROVIDER_DEFAULT', env('INBOUND_DEFAULT_PROVIDER', 'local')),
 
@@ -59,6 +64,36 @@ return [
         ],
     ],
 
+    'live_activation' => [
+        'providers' => array_filter(array_map(
+            'trim',
+            explode(',', env('LIVE_PROVIDER_REVIEW_PROVIDERS', 'mailgun,postmark,ses')),
+        )),
+        'require_active_state' => env('LIVE_PROVIDER_REQUIRE_ACTIVE_STATE', true),
+        'require_enabled_provider' => env('LIVE_PROVIDER_REQUIRE_ENABLED', true),
+        'require_signing_secret' => env('LIVE_PROVIDER_REQUIRE_SIGNING_SECRET', true),
+        'require_worker_queue' => env('LIVE_PROVIDER_REQUIRE_WORKER_QUEUE', true),
+        'require_active_domain' => env('LIVE_PROVIDER_REQUIRE_ACTIVE_DOMAIN', true),
+        'webhook' => [
+            'require_installer_middleware' => env('LIVE_PROVIDER_REQUIRE_INSTALLER_MIDDLEWARE', true),
+            'require_signature_verification' => env('LIVE_PROVIDER_REQUIRE_SIGNATURE_VERIFICATION', true),
+            'require_replay_protection' => env('LIVE_PROVIDER_REQUIRE_REPLAY_PROTECTION', true),
+            'require_duplicate_protection' => env('LIVE_PROVIDER_REQUIRE_DUPLICATE_PROTECTION', true),
+            'require_queue_handoff' => env('LIVE_PROVIDER_REQUIRE_QUEUE_HANDOFF', true),
+        ],
+        'rollback' => [
+            'fallback_provider' => env('LIVE_PROVIDER_FALLBACK_PROVIDER', 'local'),
+            'require_fallback_ready' => env('LIVE_PROVIDER_REQUIRE_FALLBACK_READY', true),
+            'suspension_ready' => env('LIVE_PROVIDER_SUSPENSION_READY', true),
+            'queue_drain_documented' => env('LIVE_PROVIDER_QUEUE_DRAIN_DOCUMENTED', true),
+            'rollback_documented' => env('LIVE_PROVIDER_ROLLBACK_DOCUMENTED', true),
+        ],
+        'observability' => [
+            'metrics_required' => env('LIVE_PROVIDER_METRICS_REQUIRED', true),
+            'operations_events_required' => env('LIVE_PROVIDER_EVENTS_REQUIRED', true),
+        ],
+    ],
+
     'webhooks' => [
         'enabled' => env('MAIL_PROVIDER_WEBHOOKS_ENABLED', true),
         'paths' => [
@@ -77,7 +112,7 @@ return [
     'providers' => [
         'local' => [
             'enabled' => env('LOCAL_INBOUND_ENABLED', true),
-            'class' => App\Services\Mail\Providers\LocalInboundProvider::class,
+            'class' => LocalInboundProvider::class,
             'metadata' => [
                 'supports_signatures' => true,
                 'supports_attachments' => true,
@@ -86,7 +121,7 @@ return [
         ],
         'mailgun' => [
             'enabled' => env('MAILGUN_INBOUND_ENABLED', false),
-            'class' => App\Services\Mail\Providers\MailgunInboundProvider::class,
+            'class' => MailgunInboundProvider::class,
             'signing_key' => env('MAILGUN_WEBHOOK_SIGNING_KEY'),
             'metadata' => [
                 'supports_signatures' => true,
@@ -97,7 +132,7 @@ return [
         ],
         'postmark' => [
             'enabled' => env('POSTMARK_INBOUND_ENABLED', false),
-            'class' => App\Services\Mail\Providers\PostmarkInboundProvider::class,
+            'class' => PostmarkInboundProvider::class,
             'signing_key' => env('POSTMARK_WEBHOOK_SIGNING_KEY'),
             'metadata' => [
                 'supports_signatures' => true,
@@ -108,7 +143,7 @@ return [
         ],
         'amazon_ses' => [
             'enabled' => env('SES_INBOUND_ENABLED', false),
-            'class' => App\Services\Mail\Providers\SesInboundProvider::class,
+            'class' => SesInboundProvider::class,
             'signing_key' => env('SES_WEBHOOK_SIGNING_KEY'),
             'metadata' => [
                 'supports_signatures' => true,
@@ -119,7 +154,7 @@ return [
         ],
         'ses' => [
             'enabled' => env('SES_INBOUND_ENABLED', false),
-            'class' => App\Services\Mail\Providers\SesInboundProvider::class,
+            'class' => SesInboundProvider::class,
             'signing_key' => env('SES_WEBHOOK_SIGNING_KEY'),
             'metadata' => [
                 'alias_for' => 'amazon_ses',

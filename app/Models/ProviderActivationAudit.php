@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Model;
     'new_state',
     'reason',
     'performed_by',
+    'review_type',
+    'recommendation',
     'metadata',
 ])]
 class ProviderActivationAudit extends Model
