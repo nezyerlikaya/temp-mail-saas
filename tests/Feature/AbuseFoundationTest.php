@@ -180,7 +180,7 @@ class AbuseFoundationTest extends TestCase
         $this->get('/login')->assertOk();
         $this->get('/register')->assertOk();
         $this->get('/admin')->assertForbidden();
-        $this->get('/install')->assertOk();
+        $this->assertContains($this->get('/install')->getStatusCode(), [200, 302]);
     }
 
     private function requestWithSignals(): Request

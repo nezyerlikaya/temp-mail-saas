@@ -734,6 +734,65 @@ The existing inbound storage default remains unchanged when no user context exis
 
 STEP15 introduces plan identity and assignment state only. A future billing module can attach provider subscriptions, checkout sessions, webhook state, invoices, and cancellation rules behind new billing services without replacing the current plan schema or public inbox contract.
 
+## STEP16 SEO And Content Foundation Expansion
+
+STEP16 expands SEO and content infrastructure without adding an SEO admin UI, blog frontend, content editor SEO panel, analytics integration, search-engine submission, hreflang management UI, OG image generation, API endpoints, or page builder behavior.
+
+## SEO Architecture
+
+`seo_settings` stores editable SEO key/value records with an optional group and public/private distinction. The table is future admin compatible while remaining safe for current public rendering. `SeoSettingSeeder` idempotently seeds:
+
+- `site_name`
+- `default_title`
+- `default_description`
+- `default_robots`
+
+`App\Services\Seo\SeoService` is the central metadata resolver. Controllers and views should not assemble SEO arrays directly. The service merges public settings, config defaults, page-specific overrides, and optional content metadata into `SeoMetaData`.
+
+## Metadata Strategy
+
+`SeoMetaData` exposes only presentation-safe fields:
+
+- Title
+- Description
+- Canonical URL
+- Robots
+- Open Graph title, description, and image
+- Twitter/X Card title, description, and image
+
+The application layout renders metadata from the service in one place to avoid duplicate meta tags. Existing pages can continue passing a `$title` value, which becomes a page-specific override.
+
+## Canonical Strategy
+
+Canonical URLs are generated from the current request without query strings unless explicitly overridden. This keeps UTM parameters and other transient query values out of canonical tags while allowing future content routes to provide stable canonical URLs.
+
+## Sitemap Strategy
+
+`App\Services\Seo\SitemapService` returns cache-friendly sitemap entries for configured static pages and published content. It intentionally uses foundation URLs for content entries and does not introduce a blog frontend. Future localized routes, blog routes, and content-type-specific URLs can extend the same service.
+
+Temporary mailbox URLs and inbox session state are excluded from the sitemap foundation.
+
+## Robots Strategy
+
+`App\Services\Seo\RobotsService` generates a simple robots response with environment-aware behavior. Production allows crawling, while non-production disallows crawling by default. The service includes the sitemap reference when sitemap support is enabled.
+
+## Structured Data Strategy
+
+`App\Services\Seo\StructuredDataService` returns schema.org-compatible arrays for website, organization, and article foundations. It does not render script tags directly; frontend rendering can be added later through layout components or content templates.
+
+## Content SEO Integration
+
+The content table already stores `meta_title` and `meta_description`. STEP16 adds model helpers:
+
+- `Content::seoTitle()` falls back from `meta_title` to `title`.
+- `Content::seoDescription()` falls back from `meta_description` to `excerpt`.
+
+This keeps content SEO behavior centralized and ready for future admin SEO editing without changing the existing content service or DTO safety boundary.
+
+## Future Admin SEO Compatibility
+
+The settings table, service layer, sitemap service, robots service, structured data service, and content helpers provide the foundation for future admin SEO screens. Admin editing, validation workflows, preview tools, generated OG images, hreflang management, and search-engine submission remain future steps.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:

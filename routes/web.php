@@ -3,6 +3,8 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\PublicInboxController;
+use App\Services\Seo\RobotsService;
+use App\Services\Seo\SitemapService;
 use App\Services\System\HealthCheckService;
 use App\Services\System\LocaleService;
 use Illuminate\Http\Request;
@@ -31,6 +33,16 @@ Route::get('/health', fn (HealthCheckService $health) => response()->json(
 Route::get('/status', fn (HealthCheckService $health) => view('pages.status', [
     'status' => $health->publicStatus(),
 ]))->name('status');
+
+Route::get('/sitemap.xml', fn (SitemapService $sitemap) => response($sitemap->xml(), 200, [
+    'Content-Type' => 'application/xml',
+    'Cache-Control' => 'public, max-age=3600',
+]))->name('sitemap');
+
+Route::get('/robots.txt', fn (RobotsService $robots) => response($robots->content(), 200, [
+    'Content-Type' => 'text/plain',
+    'Cache-Control' => 'public, max-age=3600',
+]))->name('robots');
 
 Route::get('/inbox', [PublicInboxController::class, 'index'])->name('inbox.index');
 Route::post('/inbox/generate', [PublicInboxController::class, 'generate'])

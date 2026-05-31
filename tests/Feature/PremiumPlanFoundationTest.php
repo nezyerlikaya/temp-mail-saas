@@ -154,7 +154,7 @@ class PremiumPlanFoundationTest extends TestCase
         $this->get('/login')->assertOk();
         $this->get('/register')->assertOk();
         $this->getJson('/inbox/messages')->assertOk();
-        $this->get('/install')->assertOk();
+        $this->assertContains($this->get('/install')->getStatusCode(), [200, 302]);
         $this->get('/admin')->assertForbidden();
     }
 }

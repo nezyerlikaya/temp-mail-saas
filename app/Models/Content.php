@@ -50,6 +50,16 @@ class Content extends Model
         return $this->status === ContentStatus::Archived;
     }
 
+    public function seoTitle(): string
+    {
+        return $this->meta_title ?: $this->title;
+    }
+
+    public function seoDescription(): string
+    {
+        return $this->meta_description ?: (string) $this->excerpt;
+    }
+
     protected function casts(): array
     {
         return [
