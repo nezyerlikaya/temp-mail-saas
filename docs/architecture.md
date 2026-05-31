@@ -1637,3 +1637,25 @@ The checklist also verifies health/status route registration and that `SystemHea
 ## Operational Release Notes
 
 RC1 readiness is a gate, not a deployment engine. Production deployment should still run environment review, migrations, writable path checks, scheduler setup if enabled, queue worker setup if async queues are enabled, manual browser QA, and backup/restore verification.
+
+## STEP33 Performance, Scalability And Load Hardening
+
+STEP33 adds performance foundations without changing routes, product behavior, or deployment requirements.
+
+The database layer now has additive composite indexes for high-growth query paths:
+
+- Public inbox message visibility and recent polling.
+- Provider intake lookup, duplicate detection, and provider status aggregation.
+- Cleanup, abuse, operations, queue, domain pool, domain assignment, billing, webhook, and domain health reporting paths.
+
+`config/performance.php` centralizes safe defaults for cache TTLs, query thresholds, inbox polling limits, domain pool health thresholds, and dashboard aggregation limits. The defaults remain compatible with shared hosting and can be increased on VPS deployments.
+
+`PerformanceCacheService` provides config-driven caching for health summaries, readiness summaries, localization progress, domain health summaries, and operations dashboard data. Cache failures degrade to uncached reads so the application remains available when a shared-host cache backend is missing or temporarily unavailable.
+
+The operations dashboard was tuned to reduce repeated count queries by grouping status and summary counts. Audit and domain health widgets use configurable limits to prevent accidental large reads.
+
+`LoadReadinessService` now reports database readiness, cache readiness, queue readiness, provider throughput, cleanup throughput, intake throughput, and admin route readiness. The service is observational only; it does not generate load or mutate production data.
+
+Public inbox listing now uses the performance-configured polling limit while preserving the existing response shape and privacy guarantees.
+
+Domain pool selection now respects a configurable minimum health threshold and keeps its existing fallback domain behavior when inventory is empty or inactive.

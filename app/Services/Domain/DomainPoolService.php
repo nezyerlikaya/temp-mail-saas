@@ -40,7 +40,7 @@ final class DomainPoolService extends Service
         return Domain::query()
             ->where('status', DomainStatus::Active)
             ->whereIn('tier', $tiers)
-            ->where('health_score', '>=', 1)
+            ->where('health_score', '>=', max(1, (int) config('performance.thresholds.domain_pool_min_health', 1)))
             ->tap(fn (Builder $query) => $this->applyOrganizationCompatibility($query, $organization))
             ->orderBy('priority')
             ->orderByDesc('health_score')

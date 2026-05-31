@@ -21,7 +21,7 @@ final class PublicInboxMessageService extends Service
         return $this->visibleQuery($mailbox)
             ->withCount('attachments')
             ->latest('received_at')
-            ->limit(50)
+            ->limit(max(1, (int) config('performance.thresholds.inbox_poll_limit', 50)))
             ->get()
             ->map(fn (EmailMessage $message): array => $this->toListData($message)->toArray());
     }

@@ -46,12 +46,12 @@ class EmailMessage extends Model
 
     public function recipients(): HasMany
     {
-        return $this->hasMany(EmailMessageRecipient::class);
+        return $this->hasMany(EmailMessageRecipient::class)->orderBy('id');
     }
 
     public function attachments(): HasMany
     {
-        return $this->hasMany(EmailAttachment::class);
+        return $this->hasMany(EmailAttachment::class)->orderBy('id');
     }
 
     public function isExpired(): bool
