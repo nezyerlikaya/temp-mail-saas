@@ -439,6 +439,61 @@ Invalid signatures are rejected before queue processing. Rejected intakes do not
 
 STEP11 can add real provider adapters behind the existing contracts. STEP12 can build public inbox behavior on top of normalized messages created through the same storage service. Future provider webhook routes should be disabled by default until explicitly configured and must keep queue-first behavior.
 
+## STEP11 Installer Foundation
+
+STEP11 adds a first-time setup and recovery foundation without introducing billing, licensing, updates, marketplaces, dashboards, or deployment automation. The installer lives under the reserved `/install` path and uses route names in the `installer.*` namespace.
+
+The installer flow is:
+
+1. Welcome
+2. Requirements
+3. Environment
+4. Database
+5. Finish
+
+The finish action creates an application key when missing, creates the installer lock, and redirects to `/admin/login`. The admin login path remains a future admin surface; STEP11 does not create an admin dashboard or staff login implementation.
+
+## Installation State Detection
+
+`App\Services\System\InstallationService` returns structured status arrays for the current setup state. It checks whether the environment file exists, whether `APP_KEY` is configured, whether the database is reachable, whether the installer lock exists, and whether the installer should be accessible.
+
+The service never exposes secret values. It reports booleans and safe labels only, so public recovery pages can explain what is wrong without rendering keys, passwords, tokens, or full exception details.
+
+## Installer Lock Strategy
+
+`App\Services\System\InstallerLockService` uses a storage-backed lock file at `storage/app/install.lock`. This is intentionally shared-hosting friendly because it requires no daemon, external cache, or database table. The lock survives process restarts and normal deploys as long as the storage directory is preserved.
+
+The lock blocks installer access only when the application is otherwise healthy. If recovery signals appear, the installer can reopen safely.
+
+## Recovery Strategy
+
+Recovery mode activates automatically when:
+
+- `.env` is missing.
+- `APP_KEY` is missing.
+- The application is not installed.
+- Database configuration or connectivity cannot be verified.
+
+This avoids manual code edits during first-time setup or broken configuration recovery. Recovery is conservative: it reopens only the installer foundation and does not run migrations or destructive database actions automatically.
+
+## Environment Writer Design
+
+`App\Services\System\EnvironmentWriterService` updates `.env` files without replacing unrelated keys. Existing keys are updated in place, missing keys are appended, and new files are created when necessary. The writer preserves the file's Windows or Linux line ending style where possible and returns only key names that were written, not secret values.
+
+Future installer screens can use this service for validated environment input while keeping raw environment access out of controllers and views.
+
+## Database Validation Design
+
+`App\Services\System\InstallerDatabaseService` checks whether the configured database driver is available and whether a safe `select 1` query can run on the configured connection. It catches connection failures and returns structured status instead of surfacing raw exceptions to users.
+
+STEP11 does not automatically migrate. Migration and seed execution remain explicit future installer steps so the application can stay safe on shared hosting and recover from partial configuration issues without modifying schema unexpectedly.
+
+## Middleware Boundaries
+
+`EnsureInstallerAccessible` protects the `/install` route group and prevents setup screens from being shown when the application is fully installed and healthy. `EnsureApplicationInstalled` is available for future protected route groups that should redirect to the installer when installation is incomplete.
+
+The installer middleware avoids redirect loops by allowing installer paths through and by keeping the current public, auth, localization, RBAC, media, content, and mail foundations unchanged.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:

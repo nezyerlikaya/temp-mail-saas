@@ -1,10 +1,23 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InstallerController;
 use App\Services\System\HealthCheckService;
 use App\Services\System\LocaleService;
-use App\Http\Controllers\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+Route::prefix('install')
+    ->name('installer.')
+    ->middleware('installer.accessible')
+    ->group(function (): void {
+        Route::get('/', [InstallerController::class, 'index'])->name('index');
+        Route::get('/requirements', [InstallerController::class, 'requirements'])->name('requirements');
+        Route::get('/environment', [InstallerController::class, 'environment'])->name('environment');
+        Route::get('/database', [InstallerController::class, 'database'])->name('database');
+        Route::get('/finish', [InstallerController::class, 'finish'])->name('finish');
+        Route::post('/finish', [InstallerController::class, 'complete'])->name('complete');
+    });
 
 Route::get('/', function () {
     return view('pages.home');

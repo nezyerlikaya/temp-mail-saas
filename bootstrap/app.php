@@ -1,13 +1,15 @@
 <?php
 
+use App\Console\Commands\CleanupExpiredMailCommand;
+use App\Http\Middleware\EnsureApplicationInstalled;
+use App\Http\Middleware\EnsureInstallerAccessible;
+use App\Http\Middleware\EnsureStaffHasPermission;
+use App\Http\Middleware\EnsureStaffIsActive;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use App\Console\Commands\CleanupExpiredMailCommand;
-use App\Http\Middleware\EnsureStaffHasPermission;
-use App\Http\Middleware\EnsureStaffIsActive;
-use App\Http\Middleware\SetLocale;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
+            'app.installed' => EnsureApplicationInstalled::class,
+            'installer.accessible' => EnsureInstallerAccessible::class,
             'staff.active' => EnsureStaffIsActive::class,
             'staff.permission' => EnsureStaffHasPermission::class,
         ]);
