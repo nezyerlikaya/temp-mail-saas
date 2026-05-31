@@ -18,6 +18,7 @@ use App\Console\Commands\SystemRC3CertificationCommand;
 use App\Console\Commands\SystemReadinessCheckCommand;
 use App\Console\Commands\SystemReleaseStatusCommand;
 use App\Console\Commands\SystemStagingReadinessCommand;
+use App\Console\Commands\SystemV1LaunchStatusCommand;
 use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\EnsureApplicationInstalled;
 use App\Http\Middleware\EnsureInstallerAccessible;
@@ -56,6 +57,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemRC3CertificationCommand::class,
         SystemReleaseStatusCommand::class,
         SystemStagingReadinessCommand::class,
+        SystemV1LaunchStatusCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->priority([
