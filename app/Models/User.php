@@ -47,6 +47,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(ApiKey::class);
     }
 
+    public function billingCustomers(): HasMany
+    {
+        return $this->hasMany(BillingCustomer::class);
+    }
+
     public function organizations(): BelongsToMany
     {
         return $this->belongsToMany(Organization::class, 'organization_members')

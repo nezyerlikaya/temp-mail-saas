@@ -47,6 +47,10 @@ class AppServiceProvider extends ServiceProvider
         $this->registerRateLimiter('inbox-message-detail', AbuseEventType::MessageDetail);
         $this->registerRateLimiter('auth-login-attempts', AbuseEventType::LoginAttempt);
         $this->registerRateLimiter('auth-registration-attempts', AbuseEventType::RegistrationAttempt);
+
+        RateLimiter::for('billing-webhooks', function (Request $request): Limit {
+            return Limit::perMinute(60)->by($request->ip() ?: 'billing-webhook');
+        });
     }
 
     private function registerRateLimiter(string $name, AbuseEventType $type): void

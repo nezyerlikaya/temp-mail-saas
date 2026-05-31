@@ -42,6 +42,11 @@ class Organization extends Model
         return $this->belongsTo(Plan::class);
     }
 
+    public function billingCustomers(): HasMany
+    {
+        return $this->hasMany(BillingCustomer::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === OrganizationStatus::Active;

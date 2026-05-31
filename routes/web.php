@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BillingWebhookController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\PublicInboxController;
@@ -43,6 +44,10 @@ Route::get('/robots.txt', fn (RobotsService $robots) => response($robots->conten
     'Content-Type' => 'text/plain',
     'Cache-Control' => 'public, max-age=3600',
 ]))->name('robots');
+
+Route::post('/billing/webhooks/{provider}', BillingWebhookController::class)
+    ->middleware('throttle:billing-webhooks')
+    ->name('billing.webhooks.handle');
 
 Route::get('/inbox', [PublicInboxController::class, 'index'])->name('inbox.index');
 Route::post('/inbox/generate', [PublicInboxController::class, 'generate'])

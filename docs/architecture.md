@@ -1168,6 +1168,72 @@ If the domain inventory is empty or unavailable during installer/recovery scenar
 
 Future domain pool management can add DNS validation, MX checks, SPF/DKIM checks, blacklist/reputation adapters, provider-specific health signals, custom domain ownership, SSL automation, and admin UI on top of the inventory and assignment foundations without changing public inbox contracts.
 
+## STEP22 Billing And Subscription Production Layer
+
+STEP22 adds provider-agnostic billing and subscription foundations without adding checkout UI, customer portals, subscription management UI, Stripe/Paddle/Lemon Squeezy SDKs, invoice download proxies, coupons, taxes, refunds, payment webhooks to external SDKs, or admin billing dashboards.
+
+The application never stores card numbers, payment method identifiers, raw payment details, or provider secrets.
+
+## Provider-Agnostic Billing Strategy
+
+`BillingProviderContract` defines a narrow provider boundary:
+
+- Provider name
+- Webhook verification
+- Webhook payload normalization
+- Customer resolution
+- Subscription resolution
+- Invoice resolution
+
+`LocalBillingProvider` implements this contract for local and testing workflows only. It verifies HMAC signatures with a local testing secret and performs no external API calls.
+
+Future Stripe, Paddle, or Lemon Squeezy adapters can implement the same contract without changing webhook routing or billing persistence.
+
+## Customer, Subscription, And Invoice Models
+
+`billing_customers` maps provider customers to either a user or an organization. It stores provider name, provider customer ID, optional email, and sanitized metadata.
+
+`billing_subscriptions` stores provider subscription identity, internal plan mapping, lifecycle status, interval, trial dates, period dates, cancellation dates, and sanitized metadata.
+
+`billing_invoices` stores invoice metadata such as provider invoice ID, status, currency, amount due, amount paid, hosted URL, PDF URL, issue time, paid time, and sanitized metadata.
+
+None of these tables include card data or raw payment method details.
+
+## Webhook Verification Boundary
+
+`POST /billing/webhooks/{provider}` is the only billing webhook route. It is CSRF-excluded specifically for provider callbacks and rate-limited separately. It exposes no checkout or billing UI.
+
+`BillingWebhookService` verifies the provider signature before processing, creates a webhook event record, normalizes the payload through the provider adapter, and then delegates customer, subscription, and invoice persistence to `BillingService`.
+
+Invalid signatures are rejected with a generic response. Raw webhook payloads are not stored by default; only a payload hash is kept.
+
+## Idempotency Strategy
+
+`billing_webhook_events` stores provider, optional event ID, event type, signature status, processing status, payload hash, and safe error classification. Provider plus event ID is unique.
+
+If an already processed event arrives again, it is treated as a duplicate and no second subscription/invoice/customer mutation is performed.
+
+## Card Data Exclusion
+
+Billing metadata sanitization strips card, payment method, secret, and token-like keys before writing customer, subscription, or invoice metadata. Tests assert that billing schemas do not include card fields.
+
+The local provider test payloads are intentionally fake and never include real card data.
+
+## Plan Assignment Integration
+
+`BillingService` maps provider plan IDs to internal `plans` through `config/billing.php`.
+
+When an active subscription resolves to an internal plan:
+
+- User subscriptions create or update a `UserPlanAssignment`.
+- Organization subscriptions update the organization's `plan_id`.
+
+Canceled or inactive subscription states update the subscription lifecycle safely but do not create active plan assignments. Manual plan assignments remain supported and are not globally removed by billing updates.
+
+## Future Checkout Compatibility
+
+STEP22 prepares persistence, provider abstraction, webhook idempotency, and plan sync. A future checkout layer can add hosted checkout sessions, customer portals, subscription UI, tax handling, refunds, coupons, invoice presentation, and provider SDKs on top of this foundation without replacing the storage or webhook boundary.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:
