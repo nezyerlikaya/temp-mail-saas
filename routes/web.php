@@ -20,6 +20,10 @@ Route::get('/dashboard', DashboardController::class)
     ->middleware('auth')
     ->name('dashboard');
 
+Route::get('/admin', function () {
+    abort(403, 'Admin area reserved.');
+})->name('admin.index');
+
 /*
 |--------------------------------------------------------------------------
 | Reserved Route Spaces

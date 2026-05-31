@@ -174,6 +174,65 @@ Password reset uses Laravel's broker and token table. Forgot-password responses 
 
 STEP04 authenticates normal users only. Admin panels, staff guards, staff login routes, roles, permissions, and RBAC are intentionally deferred so future authorization design can be added without mixing trust levels into the member access flow.
 
+## STEP05 Staff And RBAC Foundation
+
+STEP05 prepares staff accounts and role-based access control for a future admin area. It does not create a real admin dashboard, staff login UI, staff password reset, role management screens, or admin CRUD modules.
+
+Staff users are stored separately from normal users in `staff_users`. This keeps customer/member identity isolated from operational access and avoids mixing trust levels in the same authentication model. Normal users continue to use the `web` guard and `users` provider. Staff access is prepared through a separate `staff` guard and `staff_users` provider.
+
+## RBAC Design
+
+RBAC uses first-party Laravel models and migrations without an external package dependency:
+
+- `App\Models\StaffUser`: Staff authenticatable model with `roles()`, `hasRole()`, `hasPermission()`, and `isActive()`.
+- `App\Models\Role`: System or future custom role with many permissions and many staff users.
+- `App\Models\Permission`: Permission slug grouped by operational area.
+- `permission_role`: Role-permission pivot.
+- `role_staff_user`: Staff-role pivot.
+
+Pivot tables use composite unique indexes to prevent duplicate assignments. Foreign keys cascade on delete so orphaned pivot records do not remain if a role, permission, or staff user is removed.
+
+## Permission Slug Strategy
+
+Permission slugs are centralized in `config/permissions.php`. Slugs follow an `area.action` format, such as:
+
+- `users.view`
+- `users.suspend`
+- `staff.manage`
+- `system.manage`
+- `mail.quarantine`
+- `domains.manage`
+- `abuse.manage`
+- `settings.manage`
+
+The initial map creates stable names for future admin modules without building those modules yet.
+
+## Role Strategy
+
+System roles are seeded through `PermissionSeeder` and `RoleSeeder`:
+
+- `super_admin`: receives all permissions.
+- `admin`: broad operational access without owner-only settings management.
+- `support`: support-safe read and triage permissions.
+- `moderator`: content, abuse, and quarantine-oriented permissions.
+
+`StaffUserSeeder` is local/testing safe only. It creates a staff user only when local/testing environment variables are provided, and no production credentials are hardcoded.
+
+## Admin Route Reservation
+
+`/admin` is reserved as `admin.index` and currently returns `403`. This keeps the route name stable for STEP06+ while making it clear that the admin area is not implemented yet.
+
+Middleware placeholders are registered as:
+
+- `staff.active`
+- `staff.permission`
+
+They are available for future admin routes but are not applied broadly in STEP05.
+
+## Staff Security Boundary
+
+Staff authorization gates are prepared around `StaffUser::hasPermission()` and active staff status. Normal user authentication from STEP04 remains separate and unaffected. This separation keeps member account access, future staff access, and future RBAC policy work independently extensible.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:
