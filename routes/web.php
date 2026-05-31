@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\OperationsCenterController;
 use App\Http\Controllers\Admin\LocalizationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InstallerController;
+use App\Http\Controllers\MailProviderWebhookController;
 use App\Http\Controllers\PublicInboxController;
 use App\Services\Seo\RobotsService;
 use App\Services\Seo\SitemapService;
@@ -50,6 +51,19 @@ Route::get('/robots.txt', fn (RobotsService $robots) => response($robots->conten
 Route::post('/billing/webhooks/{provider}', BillingWebhookController::class)
     ->middleware('throttle:billing-webhooks')
     ->name('billing.webhooks.handle');
+
+Route::post('/webhooks/mailgun', MailProviderWebhookController::class)
+    ->defaults('provider', 'mailgun')
+    ->middleware('throttle:billing-webhooks')
+    ->name('webhooks.mailgun');
+Route::post('/webhooks/postmark', MailProviderWebhookController::class)
+    ->defaults('provider', 'postmark')
+    ->middleware('throttle:billing-webhooks')
+    ->name('webhooks.postmark');
+Route::post('/webhooks/ses', MailProviderWebhookController::class)
+    ->defaults('provider', 'ses')
+    ->middleware('throttle:billing-webhooks')
+    ->name('webhooks.ses');
 
 Route::get('/inbox', [PublicInboxController::class, 'index'])->name('inbox.index');
 Route::post('/inbox/generate', [PublicInboxController::class, 'generate'])

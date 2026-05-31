@@ -84,6 +84,8 @@ final class EmailMessageStorageService extends Service
 
     public function attachAttachmentMetadata(EmailMessage $message, array $attachments): void
     {
+        app(AttachmentValidationService::class)->validate($attachments);
+
         $max = (int) config('inbound.storage.max_attachment_metadata_count', 25);
 
         if (count($attachments) > $max) {

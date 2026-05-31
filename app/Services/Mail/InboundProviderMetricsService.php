@@ -30,6 +30,31 @@ final class InboundProviderMetricsService extends Service
         return $this->record($provider, 'provider_intake_failed', OperationSeverity::Warning);
     }
 
+    public function webhookReceived(string $provider): OperationsEvent
+    {
+        return $this->record($provider, 'webhook_received', OperationSeverity::Info);
+    }
+
+    public function webhookVerified(string $provider): OperationsEvent
+    {
+        return $this->record($provider, 'webhook_verified', OperationSeverity::Info);
+    }
+
+    public function webhookRejected(string $provider): OperationsEvent
+    {
+        return $this->record($provider, 'webhook_rejected', OperationSeverity::Warning);
+    }
+
+    public function webhookDuplicate(string $provider): OperationsEvent
+    {
+        return $this->record($provider, 'webhook_duplicate', OperationSeverity::Info);
+    }
+
+    public function webhookProcessed(string $provider): OperationsEvent
+    {
+        return $this->record($provider, 'webhook_processed', OperationSeverity::Info);
+    }
+
     private function record(string $provider, string $eventType, OperationSeverity $severity): OperationsEvent
     {
         return $this->operations->log(
