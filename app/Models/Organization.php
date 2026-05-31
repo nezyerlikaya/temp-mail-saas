@@ -47,6 +47,16 @@ class Organization extends Model
         return $this->hasMany(BillingCustomer::class);
     }
 
+    public function integrations(): HasMany
+    {
+        return $this->hasMany(UserIntegration::class);
+    }
+
+    public function outboundWebhooks(): HasMany
+    {
+        return $this->hasMany(OutboundWebhook::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === OrganizationStatus::Active;

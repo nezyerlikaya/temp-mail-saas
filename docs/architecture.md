@@ -1368,6 +1368,103 @@ Runtime layout direction is resolved through `LocaleService::directionFor()` and
 
 Language records expose direction awareness, allowing future frontend components, content previews, email templates, and marketing pages to adapt to RTL without changing routing or replacing layouts.
 
+## STEP25 Marketplace And Integrations Platform
+
+STEP25 adds the integrations foundation without adding a public marketplace, OAuth providers, external API calls, app-store billing, or connector-specific business workflows.
+
+## Integration Registry Architecture
+
+`integrations` stores registry metadata for available integrations:
+
+- UUID and slug identity
+- Display name and optional description
+- Category
+- Lifecycle status
+- Version
+- Compatibility and marketplace metadata
+
+`IntegrationRegistryService` is the only foundation service that creates or resolves registry entries. It normalizes slugs, supports metadata lookup, and validates active integrations before future modules connect to them.
+
+Registry records are intentionally provider-neutral. Future Slack, Discord, Google, Stripe, or custom connectors can be added as entries without changing the database shape.
+
+## User And Organization Integrations
+
+`user_integrations` connects an integration to either a user or an organization. This preserves enterprise compatibility from the organization foundation.
+
+Configuration is stored through Laravel encrypted casts and backed by text storage so secrets or provider configuration are not exposed as plaintext. The local connector also strips common sensitive keys such as `secret`, `token`, and `password` before storing configuration.
+
+Statuses are represented by `UserIntegrationStatus`:
+
+- Connected
+- Disconnected
+- Suspended
+
+## Webhook Architecture
+
+`outbound_webhooks` stores outbound webhook configuration for users or organizations:
+
+- UUID identity
+- Target URL
+- Status
+- Secret hash
+- Subscribed event names
+- Last delivery timestamp
+
+Webhook secrets are never stored in plaintext. `OutboundWebhookService` hashes incoming secrets and rotates secrets by returning the new one-time value while only persisting its hash.
+
+`webhook_deliveries` stores delivery audit metadata only:
+
+- Webhook reference
+- Event name
+- Delivery status
+- Response code
+- Delivered timestamp
+- Payload hash
+
+Raw webhook payloads are not stored. This keeps the foundation privacy-first and avoids unnecessary sensitive data retention.
+
+## Event Subscription Strategy
+
+`EventSubscriptionService` manages event subscription lists, resolves active webhooks for a given event, and prepares delivery audit records through `OutboundWebhookService`.
+
+No outbound HTTP delivery is performed in STEP25. A future queued delivery worker can consume pending `webhook_deliveries`, sign payloads using the webhook secret model, perform HTTP calls, and record delivery outcomes without changing subscription storage.
+
+## Connector Architecture
+
+`ConnectorContract` defines the connector boundary:
+
+- Connector name
+- Connect
+- Disconnect
+- Configuration validation
+
+`LocalConnector` is a no-network example implementation. It creates encrypted user integration records, supports disconnects, and provides a safe contract target for tests and future connector scaffolding.
+
+Future external connectors should implement the same contract and keep provider-specific SDKs or OAuth flows behind connector classes rather than leaking provider logic into controllers or models.
+
+## OAuth Readiness Strategy
+
+`config/integrations.php` includes disabled OAuth placeholders for provider settings, redirect handling, state TTL, connector registry entries, webhook options, marketplace categories, and compatibility metadata.
+
+OAuth is not implemented in STEP25. The config shape reserves the extension points future provider integrations will need while keeping shared-hosting deployments functional by default.
+
+## RBAC Integration
+
+STEP25 adds these permissions to the existing RBAC configuration:
+
+- `integrations.view`
+- `integrations.manage`
+- `webhooks.view`
+- `webhooks.manage`
+
+Server-side enforcement continues to use the existing staff permission gate and middleware foundation. Future admin screens or API endpoints should require these permissions rather than relying on UI visibility.
+
+## Marketplace Preparation Strategy
+
+The marketplace remains infrastructure-only. Categories, version metadata, compatibility metadata, connector registry placeholders, and lifecycle statuses are available for future public or admin marketplace modules.
+
+No public marketplace UI, connector billing, OAuth provider, external API integration, or app-store behavior is introduced in STEP25.
+
 ## Extension Strategy
 
 Future steps should extend the foundation in small, compatible increments:

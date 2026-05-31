@@ -60,6 +60,12 @@ return [
             'localization.import' => 'Import translations',
             'localization.export' => 'Export translations',
         ],
+        'integrations' => [
+            'integrations.view' => 'View integrations',
+            'integrations.manage' => 'Manage integrations',
+            'webhooks.view' => 'View outbound webhooks',
+            'webhooks.manage' => 'Manage outbound webhooks',
+        ],
     ],
 
     'roles' => [
@@ -95,6 +101,10 @@ return [
                 'localization.manage',
                 'localization.import',
                 'localization.export',
+                'integrations.view',
+                'integrations.manage',
+                'webhooks.view',
+                'webhooks.manage',
             ],
         ],
         'support' => [
@@ -113,6 +123,8 @@ return [
                 'localization.view',
                 'localization.import',
                 'localization.export',
+                'integrations.view',
+                'webhooks.view',
             ],
         ],
         'moderator' => [
