@@ -13,6 +13,7 @@ use App\Console\Commands\SystemFirstLiveCheckCommand;
 use App\Console\Commands\SystemGoLiveStatusCommand;
 use App\Console\Commands\SystemHealthCheckCommand;
 use App\Console\Commands\SystemLoadReadinessCommand;
+use App\Console\Commands\SystemPublicBetaStatusCommand;
 use App\Console\Commands\SystemRC3CertificationCommand;
 use App\Console\Commands\SystemReadinessCheckCommand;
 use App\Console\Commands\SystemReleaseStatusCommand;
@@ -50,6 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemGoLiveStatusCommand::class,
         SystemHealthCheckCommand::class,
         SystemLoadReadinessCommand::class,
+        SystemPublicBetaStatusCommand::class,
         SystemReadinessCheckCommand::class,
         SystemRC3CertificationCommand::class,
         SystemReleaseStatusCommand::class,

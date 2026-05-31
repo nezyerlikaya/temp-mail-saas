@@ -133,4 +133,29 @@ return [
             'operations' => true,
         ],
     ],
+    'public_beta' => [
+        'target' => env('PUBLIC_BETA_TARGET', 'public-beta'),
+        'require_rc3_certified' => env('PUBLIC_BETA_REQUIRE_RC3_CERTIFIED', true),
+        'onboarding' => [
+            'require_installer_complete' => env('PUBLIC_BETA_REQUIRE_INSTALLER_COMPLETE', true),
+            'require_registration' => env('PUBLIC_BETA_REQUIRE_REGISTRATION', true),
+            'require_login' => env('PUBLIC_BETA_REQUIRE_LOGIN', true),
+            'require_inbox' => env('PUBLIC_BETA_REQUIRE_INBOX', true),
+            'require_localization' => env('PUBLIC_BETA_REQUIRE_LOCALIZATION', true),
+            'require_domain_ready' => env('PUBLIC_BETA_REQUIRE_DOMAIN_READY', true),
+            'require_provider_ready' => env('PUBLIC_BETA_REQUIRE_PROVIDER_READY', true),
+        ],
+        'support' => [
+            'runbooks_documented' => env('PUBLIC_BETA_RUNBOOKS_DOCUMENTED', true),
+            'escalation_paths_documented' => env('PUBLIC_BETA_ESCALATION_PATHS_DOCUMENTED', true),
+            'troubleshooting_guidance_documented' => env('PUBLIC_BETA_TROUBLESHOOTING_DOCUMENTED', true),
+            'incident_process_required' => env('PUBLIC_BETA_INCIDENT_PROCESS_REQUIRED', true),
+            'monitoring_process_required' => env('PUBLIC_BETA_MONITORING_PROCESS_REQUIRED', true),
+        ],
+        'feedback' => [
+            'collection_documented' => env('PUBLIC_BETA_FEEDBACK_COLLECTION_DOCUMENTED', true),
+            'issue_intake_documented' => env('PUBLIC_BETA_ISSUE_INTAKE_DOCUMENTED', true),
+            'operational_response_documented' => env('PUBLIC_BETA_OPERATIONAL_RESPONSE_DOCUMENTED', true),
+        ],
+    ],
 ];
