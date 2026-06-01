@@ -57,6 +57,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(UserIntegration::class);
     }
 
+    public function feedback(): HasMany
+    {
+        return $this->hasMany(UserFeedback::class);
+    }
+
     public function outboundWebhooks(): HasMany
     {
         return $this->hasMany(OutboundWebhook::class);
