@@ -259,4 +259,37 @@ return [
             'incident_readiness' => env('FIRST_24H_INCIDENT_READINESS', true),
         ],
     ],
+    'public_launch' => [
+        'provider' => env('PUBLIC_LAUNCH_PROVIDER', 'mailgun'),
+        'domain' => env('PUBLIC_LAUNCH_DOMAIN'),
+        'rollout' => [
+            'controlled_rollout_documented' => env('PUBLIC_LAUNCH_CONTROLLED_ROLLOUT_DOCUMENTED', true),
+            'traffic_expansion_manual' => env('PUBLIC_LAUNCH_TRAFFIC_EXPANSION_MANUAL', true),
+            'rollback_owner_assigned' => env('PUBLIC_LAUNCH_ROLLBACK_OWNER_ASSIGNED', true),
+            'support_coverage_confirmed' => env('PUBLIC_LAUNCH_SUPPORT_COVERAGE_CONFIRMED', true),
+        ],
+        'traffic' => [
+            'inbox_enabled' => env('PUBLIC_LAUNCH_INBOX_ENABLED', true),
+            'polling_enabled' => env('PUBLIC_LAUNCH_POLLING_ENABLED', true),
+            'queue_required' => env('PUBLIC_LAUNCH_QUEUE_REQUIRED', true),
+            'abuse_protection_required' => env('PUBLIC_LAUNCH_ABUSE_REQUIRED', true),
+            'monitoring_required' => env('PUBLIC_LAUNCH_MONITORING_REQUIRED', true),
+        ],
+        'gates' => [
+            'security' => env('PUBLIC_LAUNCH_GATE_SECURITY', true),
+            'providers' => env('PUBLIC_LAUNCH_GATE_PROVIDERS', true),
+            'domains' => env('PUBLIC_LAUNCH_GATE_DOMAINS', true),
+            'queue' => env('PUBLIC_LAUNCH_GATE_QUEUE', true),
+            'billing' => env('PUBLIC_LAUNCH_GATE_BILLING', true),
+            'api' => env('PUBLIC_LAUNCH_GATE_API', true),
+            'operations' => env('PUBLIC_LAUNCH_GATE_OPERATIONS', true),
+            'support' => env('PUBLIC_LAUNCH_GATE_SUPPORT', true),
+        ],
+        'observation' => [
+            'window_days' => env('PUBLIC_LAUNCH_OBSERVATION_DAYS', 7),
+            'daily_checkpoints' => env('PUBLIC_LAUNCH_DAILY_CHECKPOINTS', 3),
+            'incident_review_required' => env('PUBLIC_LAUNCH_INCIDENT_REVIEW_REQUIRED', true),
+            'rollback_review_required' => env('PUBLIC_LAUNCH_ROLLBACK_REVIEW_REQUIRED', true),
+        ],
+    ],
 ];
