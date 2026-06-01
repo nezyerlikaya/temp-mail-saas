@@ -21,6 +21,7 @@ use App\Console\Commands\SystemGoLiveStatusCommand;
 use App\Console\Commands\SystemGovernanceStatusCommand;
 use App\Console\Commands\SystemGrowthStatusCommand;
 use App\Console\Commands\SystemHealthCheckCommand;
+use App\Console\Commands\SystemInboxRoadmapStatusCommand;
 use App\Console\Commands\SystemLaunchMonitoringStatusCommand;
 use App\Console\Commands\SystemLoadReadinessCommand;
 use App\Console\Commands\SystemProductIntelligenceCommand;
@@ -76,6 +77,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemGovernanceStatusCommand::class,
         SystemGrowthStatusCommand::class,
         SystemHealthCheckCommand::class,
+        SystemInboxRoadmapStatusCommand::class,
         SystemLaunchMonitoringStatusCommand::class,
         SystemLoadReadinessCommand::class,
         SystemPublicBetaStatusCommand::class,
