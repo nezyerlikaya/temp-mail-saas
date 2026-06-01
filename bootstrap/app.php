@@ -12,6 +12,7 @@ use App\Console\Commands\OperationsCollectMetricsCommand;
 use App\Console\Commands\OperationsHealthSummaryCommand;
 use App\Console\Commands\ProviderActivationStatusCommand;
 use App\Console\Commands\ProviderLiveReadinessCommand;
+use App\Console\Commands\SystemAdminRoadmapStatusCommand;
 use App\Console\Commands\SystemAnalyticsStatusCommand;
 use App\Console\Commands\SystemDeploymentReadinessCommand;
 use App\Console\Commands\SystemEcosystemStatusCommand;
@@ -68,6 +69,7 @@ return Application::configure(basePath: dirname(__DIR__))
         OperationsHealthSummaryCommand::class,
         ProviderActivationStatusCommand::class,
         ProviderLiveReadinessCommand::class,
+        SystemAdminRoadmapStatusCommand::class,
         SystemAnalyticsStatusCommand::class,
         SystemDeploymentReadinessCommand::class,
         SystemEnterpriseStatusCommand::class,
