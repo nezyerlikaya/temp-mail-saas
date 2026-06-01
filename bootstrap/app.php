@@ -15,6 +15,7 @@ use App\Console\Commands\ProviderLiveReadinessCommand;
 use App\Console\Commands\SystemDeploymentReadinessCommand;
 use App\Console\Commands\SystemFirstLiveCheckCommand;
 use App\Console\Commands\SystemGoLiveStatusCommand;
+use App\Console\Commands\SystemGrowthStatusCommand;
 use App\Console\Commands\SystemHealthCheckCommand;
 use App\Console\Commands\SystemLaunchMonitoringStatusCommand;
 use App\Console\Commands\SystemLoadReadinessCommand;
@@ -61,6 +62,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemDeploymentReadinessCommand::class,
         SystemFirstLiveCheckCommand::class,
         SystemGoLiveStatusCommand::class,
+        SystemGrowthStatusCommand::class,
         SystemHealthCheckCommand::class,
         SystemLaunchMonitoringStatusCommand::class,
         SystemLoadReadinessCommand::class,

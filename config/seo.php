@@ -44,4 +44,39 @@ return [
         'twitter_description' => null,
         'twitter_image' => env('SEO_TWITTER_IMAGE'),
     ],
+    'growth_readiness' => [
+        'seo' => [
+            'require_sitemap' => env('SEO_GROWTH_REQUIRE_SITEMAP', true),
+            'require_robots' => env('SEO_GROWTH_REQUIRE_ROBOTS', true),
+            'require_structured_data' => env('SEO_GROWTH_REQUIRE_STRUCTURED_DATA', true),
+            'require_canonical' => env('SEO_GROWTH_REQUIRE_CANONICAL', true),
+            'require_metadata' => env('SEO_GROWTH_REQUIRE_METADATA', true),
+        ],
+        'content' => [
+            'publication_ready' => env('SEO_GROWTH_CONTENT_PUBLICATION_READY', true),
+            'category_ready' => env('SEO_GROWTH_CONTENT_CATEGORY_READY', true),
+            'tag_ready' => env('SEO_GROWTH_CONTENT_TAG_READY', true),
+            'seo_content_ready' => env('SEO_GROWTH_CONTENT_SEO_READY', true),
+            'editorial_ready' => env('SEO_GROWTH_CONTENT_EDITORIAL_READY', true),
+            'require_published_content' => env('SEO_GROWTH_REQUIRE_PUBLISHED_CONTENT', false),
+        ],
+        'landing_pages' => [
+            'homepage_route' => env('SEO_GROWTH_HOMEPAGE_ROUTE', 'home'),
+            'metadata_required' => env('SEO_GROWTH_LANDING_METADATA_REQUIRED', true),
+            'structured_data_required' => env('SEO_GROWTH_LANDING_STRUCTURED_DATA_REQUIRED', true),
+            'discoverability_required' => env('SEO_GROWTH_LANDING_DISCOVERABILITY_REQUIRED', true),
+        ],
+        'indexing' => [
+            'sitemap_coverage_required' => env('SEO_GROWTH_INDEXING_SITEMAP_REQUIRED', true),
+            'robots_coverage_required' => env('SEO_GROWTH_INDEXING_ROBOTS_REQUIRED', true),
+            'canonical_coverage_required' => env('SEO_GROWTH_INDEXING_CANONICAL_REQUIRED', true),
+            'crawl_ready' => env('SEO_GROWTH_INDEXING_CRAWL_READY', true),
+        ],
+        'certification' => [
+            'seo' => env('SEO_GROWTH_CERTIFY_SEO', true),
+            'content' => env('SEO_GROWTH_CERTIFY_CONTENT', true),
+            'indexing' => env('SEO_GROWTH_CERTIFY_INDEXING', true),
+            'landing_page' => env('SEO_GROWTH_CERTIFY_LANDING_PAGE', true),
+        ],
+    ],
 ];
