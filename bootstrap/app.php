@@ -18,6 +18,7 @@ use App\Console\Commands\SystemEcosystemStatusCommand;
 use App\Console\Commands\SystemEnterpriseStatusCommand;
 use App\Console\Commands\SystemFirstLiveCheckCommand;
 use App\Console\Commands\SystemGoLiveStatusCommand;
+use App\Console\Commands\SystemGovernanceStatusCommand;
 use App\Console\Commands\SystemGrowthStatusCommand;
 use App\Console\Commands\SystemHealthCheckCommand;
 use App\Console\Commands\SystemLaunchMonitoringStatusCommand;
@@ -71,6 +72,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemEcosystemStatusCommand::class,
         SystemFirstLiveCheckCommand::class,
         SystemGoLiveStatusCommand::class,
+        SystemGovernanceStatusCommand::class,
         SystemGrowthStatusCommand::class,
         SystemHealthCheckCommand::class,
         SystemLaunchMonitoringStatusCommand::class,
