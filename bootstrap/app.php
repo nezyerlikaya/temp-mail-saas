@@ -29,6 +29,7 @@ use App\Console\Commands\SystemReleaseStatusCommand;
 use App\Console\Commands\SystemRevenueStatusCommand;
 use App\Console\Commands\SystemRoadmapStatusCommand;
 use App\Console\Commands\SystemStagingReadinessCommand;
+use App\Console\Commands\SystemSupportIntelligenceCommand;
 use App\Console\Commands\SystemV1LaunchStatusCommand;
 use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\EnsureApplicationInstalled;
@@ -78,6 +79,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemReleaseStatusCommand::class,
         SystemRevenueStatusCommand::class,
         SystemRoadmapStatusCommand::class,
+        SystemSupportIntelligenceCommand::class,
         SystemStagingReadinessCommand::class,
         SystemV1LaunchStatusCommand::class,
     ])

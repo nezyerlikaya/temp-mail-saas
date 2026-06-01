@@ -52,6 +52,11 @@ class Organization extends Model
         return $this->hasMany(UserIntegration::class);
     }
 
+    public function supportRequests(): HasMany
+    {
+        return $this->hasMany(SupportRequest::class);
+    }
+
     public function outboundWebhooks(): HasMany
     {
         return $this->hasMany(OutboundWebhook::class);
