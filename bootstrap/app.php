@@ -19,6 +19,7 @@ use App\Console\Commands\SystemAutomationRoadmapStatusCommand;
 use App\Console\Commands\SystemDeploymentReadinessCommand;
 use App\Console\Commands\SystemEcosystemStatusCommand;
 use App\Console\Commands\SystemEnterpriseAuthorizationStatusCommand;
+use App\Console\Commands\SystemEnterpriseBillingStatusCommand;
 use App\Console\Commands\SystemEnterpriseDataPolicyStatusCommand;
 use App\Console\Commands\SystemEnterpriseDomainStatusCommand;
 use App\Console\Commands\SystemEnterpriseGovernanceStatusCommand;
@@ -85,6 +86,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemAutomationRoadmapStatusCommand::class,
         SystemDeploymentReadinessCommand::class,
         SystemEnterpriseAuthorizationStatusCommand::class,
+        SystemEnterpriseBillingStatusCommand::class,
         SystemEnterpriseDataPolicyStatusCommand::class,
         SystemEnterpriseDomainStatusCommand::class,
         SystemEnterpriseGovernanceStatusCommand::class,
