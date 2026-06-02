@@ -27,6 +27,7 @@ use App\Console\Commands\SystemHealthCheckCommand;
 use App\Console\Commands\SystemInboxRoadmapStatusCommand;
 use App\Console\Commands\SystemLaunchMonitoringStatusCommand;
 use App\Console\Commands\SystemLoadReadinessCommand;
+use App\Console\Commands\SystemOrganizationRoadmapStatusCommand;
 use App\Console\Commands\SystemProductIntelligenceCommand;
 use App\Console\Commands\SystemPublicBetaStatusCommand;
 use App\Console\Commands\SystemPublicLaunchStatusCommand;
@@ -86,6 +87,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemInboxRoadmapStatusCommand::class,
         SystemLaunchMonitoringStatusCommand::class,
         SystemLoadReadinessCommand::class,
+        SystemOrganizationRoadmapStatusCommand::class,
         SystemPublicBetaStatusCommand::class,
         SystemPublicLaunchStatusCommand::class,
         SystemProductIntelligenceCommand::class,
