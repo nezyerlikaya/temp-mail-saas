@@ -18,6 +18,7 @@ use App\Console\Commands\SystemApiRoadmapStatusCommand;
 use App\Console\Commands\SystemAutomationRoadmapStatusCommand;
 use App\Console\Commands\SystemDeploymentReadinessCommand;
 use App\Console\Commands\SystemEcosystemStatusCommand;
+use App\Console\Commands\SystemEnterpriseDataPolicyStatusCommand;
 use App\Console\Commands\SystemEnterpriseDomainStatusCommand;
 use App\Console\Commands\SystemEnterpriseStatusCommand;
 use App\Console\Commands\SystemFirstLiveCheckCommand;
@@ -78,6 +79,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemApiRoadmapStatusCommand::class,
         SystemAutomationRoadmapStatusCommand::class,
         SystemDeploymentReadinessCommand::class,
+        SystemEnterpriseDataPolicyStatusCommand::class,
         SystemEnterpriseDomainStatusCommand::class,
         SystemEnterpriseStatusCommand::class,
         SystemEcosystemStatusCommand::class,
