@@ -22,6 +22,7 @@ use App\Console\Commands\SystemEnterpriseDataPolicyStatusCommand;
 use App\Console\Commands\SystemEnterpriseDomainStatusCommand;
 use App\Console\Commands\SystemEnterpriseGovernanceStatusCommand;
 use App\Console\Commands\SystemEnterpriseIdentityStatusCommand;
+use App\Console\Commands\SystemEnterpriseProvisioningStatusCommand;
 use App\Console\Commands\SystemEnterpriseStatusCommand;
 use App\Console\Commands\SystemFirstLiveCheckCommand;
 use App\Console\Commands\SystemGoLiveStatusCommand;
@@ -96,6 +97,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemLaunchMonitoringStatusCommand::class,
         SystemLoadReadinessCommand::class,
         SystemOrganizationRoadmapStatusCommand::class,
+        SystemEnterpriseProvisioningStatusCommand::class,
         SystemPublicBetaStatusCommand::class,
         SystemPublicLaunchStatusCommand::class,
         SystemProductIntelligenceCommand::class,
