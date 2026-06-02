@@ -20,6 +20,7 @@ use App\Console\Commands\SystemDeploymentReadinessCommand;
 use App\Console\Commands\SystemEcosystemStatusCommand;
 use App\Console\Commands\SystemEnterpriseDataPolicyStatusCommand;
 use App\Console\Commands\SystemEnterpriseDomainStatusCommand;
+use App\Console\Commands\SystemEnterpriseGovernanceStatusCommand;
 use App\Console\Commands\SystemEnterpriseStatusCommand;
 use App\Console\Commands\SystemFirstLiveCheckCommand;
 use App\Console\Commands\SystemGoLiveStatusCommand;
@@ -81,6 +82,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemDeploymentReadinessCommand::class,
         SystemEnterpriseDataPolicyStatusCommand::class,
         SystemEnterpriseDomainStatusCommand::class,
+        SystemEnterpriseGovernanceStatusCommand::class,
         SystemEnterpriseStatusCommand::class,
         SystemEcosystemStatusCommand::class,
         SystemFirstLiveCheckCommand::class,
