@@ -23,6 +23,7 @@ use App\Console\Commands\SystemEnterpriseDataPolicyStatusCommand;
 use App\Console\Commands\SystemEnterpriseDomainStatusCommand;
 use App\Console\Commands\SystemEnterpriseGovernanceStatusCommand;
 use App\Console\Commands\SystemEnterpriseIdentityStatusCommand;
+use App\Console\Commands\SystemEnterpriseObservabilityStatusCommand;
 use App\Console\Commands\SystemEnterpriseProvisioningStatusCommand;
 use App\Console\Commands\SystemEnterpriseStatusCommand;
 use App\Console\Commands\SystemFirstLiveCheckCommand;
@@ -88,6 +89,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemEnterpriseDomainStatusCommand::class,
         SystemEnterpriseGovernanceStatusCommand::class,
         SystemEnterpriseIdentityStatusCommand::class,
+        SystemEnterpriseObservabilityStatusCommand::class,
         SystemEnterpriseStatusCommand::class,
         SystemEcosystemStatusCommand::class,
         SystemFirstLiveCheckCommand::class,
