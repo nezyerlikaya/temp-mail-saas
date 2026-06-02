@@ -15,6 +15,7 @@ use App\Console\Commands\ProviderLiveReadinessCommand;
 use App\Console\Commands\SystemAdminRoadmapStatusCommand;
 use App\Console\Commands\SystemAnalyticsStatusCommand;
 use App\Console\Commands\SystemApiRoadmapStatusCommand;
+use App\Console\Commands\SystemAutomationRoadmapStatusCommand;
 use App\Console\Commands\SystemDeploymentReadinessCommand;
 use App\Console\Commands\SystemEcosystemStatusCommand;
 use App\Console\Commands\SystemEnterpriseStatusCommand;
@@ -73,6 +74,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SystemAdminRoadmapStatusCommand::class,
         SystemAnalyticsStatusCommand::class,
         SystemApiRoadmapStatusCommand::class,
+        SystemAutomationRoadmapStatusCommand::class,
         SystemDeploymentReadinessCommand::class,
         SystemEnterpriseStatusCommand::class,
         SystemEcosystemStatusCommand::class,
